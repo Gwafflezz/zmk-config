@@ -6,16 +6,15 @@ Corne layer overlay
 Desenha uma miniatura do *seu* Corne no canto superior direito da tela e troca
 a camada exibida ao vivo, sempre que ela é ativada no teclado.
 
-Como funciona:
-  - O firmware (módulo zmk-keypeek-layer-notifier + zmk-raw-hid) envia, a cada
-    troca de camada, um report Raw HID de 32 bytes:
-        byte[0] = 0xFF            (marcador de pacote de camada)
-        byte[1] = 4
-        byte[2..5]  = default layer state (uint32 LE)
-        byte[6..9]  = bitmask das camadas ativas (uint32 LE)
-    A camada exibida = bit mais alto setado no bitmask (a que o ZMK resolve).
-  - O keymap (nomes/labels das teclas) é lido localmente do corne.keymap,
-    então NÃO precisamos do ZMK Studio.
+Como funciona (híbrido USB + BT):
+  - USB: o firmware (zmk-keypeek-layer-notifier + zmk-raw-hid) envia um report
+    Raw HID de 32 bytes com o bitmask das camadas ativas via /dev/hidrawX.
+  - BT: os macros `lower_mo`/`raise_mo` no keymap emitem F13/F14 (lower) e
+    F15/F16 (raise) ao entrar/sair de cada camada. O overlay escuta via evdev
+    (/dev/input/eventX) — funciona igual por USB e Bluetooth.
+  - Ambos os caminhos rodam simultaneamente; qualquer um que conectar dispara
+    a atualização da camada.
+  - O keymap (labels das teclas) é lido localmente do corne.keymap.
 
 Uso:
     python3 corne_layer_overlay.py [--keymap CAMINHO] [--always] [--scale N]
@@ -28,6 +27,7 @@ import argparse
 import glob
 import os
 import re
+import select
 import sys
 import threading
 import time
@@ -152,6 +152,98 @@ class HidReader(threading.Thread):
                 except OSError:
                     pass
             time.sleep(1)  # device sumiu, tenta de novo
+
+
+class EvdevReader(threading.Thread):
+    """Detecção de camada via evdev — funciona por BT e USB.
+
+    Os macros lower_mo/raise_mo no keymap emitem:
+      F13 → entrou na lower (layer 1)   F14 → saiu da lower
+      F15 → entrou na raise (layer 2)   F16 → saiu da raise
+    O tri-layer (mouse, layer 3) é inferido quando ambas estão ativas.
+
+    Silencioso: não envia status, apenas on_layer. Roda em paralelo com
+    HidReader; qualquer um que disparar primeiro atualiza o overlay.
+    """
+
+    _ENTER = {}   # preenchido após tentar importar evdev
+    _EXIT  = {}
+    _AVAILABLE = False
+
+    def __init__(self, on_layer):
+        super().__init__(daemon=True)
+        self._on_layer = on_layer
+        self._stop = threading.Event()
+        self._active = set()
+
+    def stop(self):
+        self._stop.set()
+
+    @classmethod
+    def _try_import(cls):
+        if cls._AVAILABLE:
+            return True
+        try:
+            import evdev
+            from evdev import ecodes
+            cls._evdev = evdev
+            cls._ecodes = ecodes
+            cls._ENTER = {ecodes.KEY_F13: 1, ecodes.KEY_F15: 2}
+            cls._EXIT  = {ecodes.KEY_F14: 1, ecodes.KEY_F16: 2}
+            cls._AVAILABLE = True
+            return True
+        except ImportError:
+            return False
+
+    def _find(self):
+        ev = self._evdev
+        ec = self._ecodes
+        for path in ev.list_devices():
+            try:
+                d = ev.InputDevice(path)
+                if d.info.vendor == 0x1D50 and d.info.product == 0x615E:
+                    caps = d.capabilities().get(ec.EV_KEY, [])
+                    if ec.KEY_F13 in caps and ec.KEY_A in caps:
+                        return d
+            except OSError:
+                pass
+        return None
+
+    def _layer(self):
+        if {1, 2} <= self._active:
+            return 3
+        return max(self._active, default=0)
+
+    def run(self):
+        if not self._try_import():
+            return  # python-evdev não instalado; caminho BT indisponível
+
+        ec = self._ecodes
+        while not self._stop.is_set():
+            dev = self._find()
+            if not dev:
+                time.sleep(2)
+                continue
+            try:
+                while not self._stop.is_set():
+                    r, _, _ = select.select([dev.fd], [], [], 0.5)
+                    if not r:
+                        continue
+                    for ev in dev.read():
+                        if ev.type != ec.EV_KEY or ev.value != 1:
+                            continue
+                        changed = False
+                        if ev.code in self._ENTER:
+                            self._active.add(self._ENTER[ev.code])
+                            changed = True
+                        elif ev.code in self._EXIT:
+                            self._active.discard(self._EXIT[ev.code])
+                            changed = True
+                        if changed:
+                            GLib.idle_add(self._on_layer, self._layer())
+            except OSError:
+                self._active.clear()
+            time.sleep(1)
 
 
 # ---------------------------------------------------------------------------
@@ -302,7 +394,7 @@ class CornePainter:
         self.half_gap = 26 * s
         self.margin = 12 * s
         self.header = 30 * s
-        self.font = 11 * s
+        self.font = 15 * s
         self.col = self.kw + self.gap
         self.left_x = self.margin
         self.right_x = self.left_x + 6 * self.col + self.half_gap
@@ -419,14 +511,12 @@ class CornePainter:
 # ---------------------------------------------------------------------------
 
 class OverlayWindow(Gtk.ApplicationWindow):
-    def __init__(self, app, layers, scale, always, linger_ms):
+    def __init__(self, app, layers, scale, always):
         super().__init__(application=app)
         self.layers = layers
         self.always = always
-        self.linger_ms = linger_ms
         self.current_layer = 0
         self.status_msg = None
-        self._hide_source = None
 
         self.painter = CornePainter(scale)
         self.set_title("Corne Layer Overlay")
@@ -476,13 +566,12 @@ class OverlayWindow(Gtk.ApplicationWindow):
     # chamados pela thread de HID via GLib.idle_add
     def on_layer(self, layer):
         self.status_msg = None
-        if layer != self.current_layer:
-            self.current_layer = layer
-        self.area.queue_draw()
-        if self.always or layer != 0:
-            self._show()
+        self.current_layer = layer
         if not self.always and layer == 0:
-            self._schedule_hide()
+            self.set_visible(False)
+            return False
+        self.set_visible(True)
+        self.area.queue_draw()
         return False
 
     def on_status(self, msg):
@@ -490,34 +579,17 @@ class OverlayWindow(Gtk.ApplicationWindow):
         self.area.queue_draw()
         if msg is None:
             if self.always:
-                self._show()
+                self.set_visible(True)
         else:
-            self._show()  # mostra o aviso de status
+            self.set_visible(True)
         return False
-
-    def _show(self):
-        if self._hide_source:
-            GLib.source_remove(self._hide_source)
-            self._hide_source = None
-        self.set_visible(True)
-
-    def _schedule_hide(self):
-        if self._hide_source:
-            GLib.source_remove(self._hide_source)
-
-        def _hide():
-            self.set_visible(False)
-            self._hide_source = None
-            return False
-
-        self._hide_source = GLib.timeout_add(self.linger_ms, _hide)
 
 
 class OverlayApp(Gtk.Application):
-    def __init__(self, layers, scale, always, linger_ms):
+    def __init__(self, layers, scale, always):
         super().__init__(application_id="dev.corne.layeroverlay",
                          flags=0)
-        self._args = (layers, scale, always, linger_ms)
+        self._args = (layers, scale, always)
         self.win = None
         self.reader = None
 
@@ -525,7 +597,9 @@ class OverlayApp(Gtk.Application):
         if self.win is None:
             self.win = OverlayWindow(self, *self._args)
             self.reader = HidReader(self.win.on_layer, self.win.on_status)
+            self.evdev_reader = EvdevReader(self.win.on_layer)
             self.reader.start()
+            self.evdev_reader.start()
         # janela já presente; só mostra se 'always', senão fica oculta até evento
         if self._args[2]:  # always
             self.win.present()
@@ -546,10 +620,8 @@ def main():
                     help="caminho do .keymap (padrão: ../config/corne.keymap)")
     ap.add_argument("--always", action="store_true",
                     help="mantém o overlay sempre visível (não some na camada base)")
-    ap.add_argument("--scale", type=float, default=1.0,
-                    help="escala da miniatura (padrão 1.0)")
-    ap.add_argument("--linger", type=int, default=1200,
-                    help="ms que o overlay fica antes de sumir na camada base")
+    ap.add_argument("--scale", type=float, default=0.7,
+                    help="escala da miniatura (padrão 0.7)")
     args = ap.parse_args()
 
     if not os.path.exists(args.keymap):
@@ -565,7 +637,7 @@ def main():
         print("[corne-overlay] aviso: gtk4-layer-shell ausente — usando janela "
               "normal (pode não ficar ancorada/always-on-top no niri).")
 
-    app = OverlayApp(layers, args.scale, args.always, args.linger)
+    app = OverlayApp(layers, args.scale, args.always)
     app.run(None)
 
 
