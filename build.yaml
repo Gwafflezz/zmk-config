@@ -19,7 +19,10 @@
 #
 ---
 include:
+  # raw_hid_adapter goes on the central half only (left) — it carries the live
+  # layer events the overlay listens to. No studio snippet: the overlay reads
+  # the keymap from corne.keymap locally, not from the device.
   - board: nice_nano_v2
-    shield: corne_left
+    shield: corne_left raw_hid_adapter
   - board: nice_nano_v2
     shield: corne_right

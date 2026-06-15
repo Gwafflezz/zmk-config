@@ -1,0 +1,19 @@
+# Acesso ao Raw HID do Corne (ZMK) sem root, para o corne_layer_overlay.
+#
+# Instale:
+#   sudo cp 99-zmk-raw-hid.rules /etc/udev/rules.d/
+#   sudo udevadm control --reload-rules && sudo udevadm trigger
+#
+# Confirme o VID/PID do seu teclado DEPOIS de gravar o firmware com raw HID:
+#   lsusb | grep -i zmk        (ou observe o dispositivo novo ao conectar)
+#   cat /sys/class/hidraw/hidraw*/device/uevent
+# Ajuste idVendor/idProduct abaixo se forem diferentes.
+#
+# 1d50:615e é o VID/PID padrão do ZMK. TAG+="uaccess" libera para o usuário logado.
+
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="1d50", ATTRS{idProduct}=="615e", MODE="0660", TAG+="uaccess"
+
+# Fallback amplo: qualquer hidraw cujo report descriptor seja Raw HID (Usage Page 0xFF60)
+# não dá para casar direto em udev; se o VID/PID acima não bater, use uma regra por
+# fabricante, por exemplo (descomente e ajuste):
+# KERNEL=="hidraw*", ATTRS{manufacturer}=="ZMK Project", MODE="0660", TAG+="uaccess"

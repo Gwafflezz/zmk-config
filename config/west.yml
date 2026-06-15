@@ -6,9 +6,21 @@ manifest:
       url-base: https://github.com/zmkfirmware
     # Additional modules containing boards/shields/custom code can be listed here as well
     # See https://docs.zephyrproject.org/3.2.0/develop/west/manifest.html#projects
+    - name: zzeneg
+      url-base: https://github.com/zzeneg
+    - name: srwi
+      url-base: https://github.com/srwi
   projects:
     - name: zmk
       remote: zmkfirmware
       import: app/west.yml
+    # Raw HID transport + KeyPeek layer notifier (live layer events for the overlay).
+    # These modules track main, so pin them explicitly (overrides the v0.3 default).
+    - name: zmk-raw-hid
+      remote: zzeneg
+      revision: main
+    - name: zmk-keypeek-layer-notifier
+      remote: srwi
+      revision: main
   self:
     path: config
