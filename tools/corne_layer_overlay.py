@@ -85,7 +85,7 @@ LAYER_PACKET_MARKER = 0xFF
 
 
 def find_raw_hid_device():
-    """Procura o /dev/hidrawN cujo report descriptor é o do zmk-raw-hid."""
+    """Retorna /dev/hidrawN do zmk-raw-hid somente se acessível para leitura."""
     for dev in sorted(glob.glob("/dev/hidraw*")):
         name = os.path.basename(dev)
         desc_path = f"/sys/class/hidraw/{name}/device/report_descriptor"
@@ -94,47 +94,37 @@ def find_raw_hid_device():
                 desc = f.read()
         except OSError:
             continue
-        if _USAGE_PAGE_FF60 in desc and _USAGE_61 in desc:
+        if not (_USAGE_PAGE_FF60 in desc and _USAGE_61 in desc):
+            continue
+        # verifica acesso antes de retornar para não gerar erro falso no BT
+        if os.access(dev, os.R_OK):
             return dev
     return None
 
 
 class HidReader(threading.Thread):
-    """Lê os pacotes de camada do teclado e chama on_layer/on_status."""
+    """Lê pacotes de camada via Raw HID (USB). Silencioso quando indisponível
+    — no BT o EvdevReader assume sozinho sem mostrar erros."""
 
-    def __init__(self, on_layer, on_status):
+    def __init__(self, on_layer):
         super().__init__(daemon=True)
         self._on_layer = on_layer
-        self._on_status = on_status
         self._stop = threading.Event()
 
     def stop(self):
         self._stop.set()
 
-    def _emit_status(self, msg):
-        GLib.idle_add(self._on_status, msg)
-
-    def _emit_layer(self, layer):
-        GLib.idle_add(self._on_layer, layer)
-
     def run(self):
         while not self._stop.is_set():
             path = find_raw_hid_device()
             if not path:
-                self._emit_status("Teclado não encontrado (conecte/ligue o Corne)")
                 time.sleep(2)
                 continue
             try:
                 fd = os.open(path, os.O_RDONLY)
-            except PermissionError:
-                self._emit_status(f"Sem permissão em {path} — veja 99-zmk-raw-hid.rules")
-                time.sleep(3)
-                continue
             except OSError:
                 time.sleep(2)
                 continue
-
-            self._emit_status(None)  # conectado
             try:
                 while not self._stop.is_set():
                     data = os.read(fd, 64)
@@ -143,7 +133,7 @@ class HidReader(threading.Thread):
                     if len(data) >= 10 and data[0] == LAYER_PACKET_MARKER:
                         mask = int.from_bytes(data[6:10], "little")
                         layer = mask.bit_length() - 1 if mask else 0
-                        self._emit_layer(layer)
+                        GLib.idle_add(self._on_layer, layer)
             except OSError:
                 pass
             finally:
@@ -151,7 +141,7 @@ class HidReader(threading.Thread):
                     os.close(fd)
                 except OSError:
                     pass
-            time.sleep(1)  # device sumiu, tenta de novo
+            time.sleep(1)
 
 
 class EvdevReader(threading.Thread):
@@ -250,6 +240,9 @@ class EvdevReader(threading.Thread):
 # Parser do keymap
 # ---------------------------------------------------------------------------
 
+_KEYMAP_BLOCK_RE = re.compile(
+    r'compatible\s*=\s*"zmk,keymap"\s*;(.*)', re.DOTALL
+)
 _LAYER_RE = re.compile(
     r"(\w+)\s*\{[^{}]*?bindings\s*=\s*<(.*?)>\s*;", re.DOTALL
 )
@@ -349,8 +342,13 @@ def parse_keymap(path):
     text = re.sub(r"/\*.*?\*/", "", text, flags=re.DOTALL)
     text = re.sub(r"//[^\n]*", "", text)
 
+    # Restringe a busca ao bloco `keymap { compatible = "zmk,keymap"; ... }`
+    # para não confundir macros/behaviors com camadas.
+    m = _KEYMAP_BLOCK_RE.search(text)
+    keymap_text = m.group(1) if m else text
+
     layers = []
-    for name, body in _LAYER_RE.findall(text):
+    for name, body in _LAYER_RE.findall(keymap_text):
         tokens = body.split()
         bindings = []
         cur = None
@@ -516,7 +514,6 @@ class OverlayWindow(Gtk.ApplicationWindow):
         self.layers = layers
         self.always = always
         self.current_layer = 0
-        self.status_msg = None
 
         self.painter = CornePainter(scale)
         self.set_title("Corne Layer Overlay")
@@ -552,36 +549,17 @@ class OverlayWindow(Gtk.ApplicationWindow):
         LayerShell.set_namespace(self, "corne-layer-overlay")
 
     def _on_draw(self, area, cr, width, height):
-        if self.status_msg is not None:
-            self.painter._round_rect(cr, 0, 0, width, height, 14)
-            cr.set_source_rgba(0.10, 0.11, 0.13, 0.93)
-            cr.fill()
-            self.painter._text(cr, 14, height / 2, self.status_msg,
-                               12, (1, 0.7, 0.4), valign="center")
-            return
         name, labels = self.layers[self.current_layer] if \
             self.current_layer < len(self.layers) else ("?", [])
         self.painter.draw(cr, width, height, self.current_layer, name, labels)
 
-    # chamados pela thread de HID via GLib.idle_add
     def on_layer(self, layer):
-        self.status_msg = None
         self.current_layer = layer
         if not self.always and layer == 0:
             self.set_visible(False)
             return False
         self.set_visible(True)
         self.area.queue_draw()
-        return False
-
-    def on_status(self, msg):
-        self.status_msg = msg
-        self.area.queue_draw()
-        if msg is None:
-            if self.always:
-                self.set_visible(True)
-        else:
-            self.set_visible(True)
         return False
 
 
@@ -596,7 +574,7 @@ class OverlayApp(Gtk.Application):
     def do_activate(self):
         if self.win is None:
             self.win = OverlayWindow(self, *self._args)
-            self.reader = HidReader(self.win.on_layer, self.win.on_status)
+            self.reader = HidReader(self.win.on_layer)
             self.evdev_reader = EvdevReader(self.win.on_layer)
             self.reader.start()
             self.evdev_reader.start()
