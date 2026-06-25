@@ -16,6 +16,17 @@
 };
 
 / {
+        chosen {
+                zmk,battery = &vbatt;
+        };
+
+        vbatt: vbatt {
+                compatible = "zmk,battery-voltage-divider";
+                io-channels = <&adc 2>;
+                output-ohms = <1000000>;
+                full-ohms = <2000000>;
+        };
+
         conditional_layers {
                 compatible = "zmk,conditional-layers";
                 tri_layer {
