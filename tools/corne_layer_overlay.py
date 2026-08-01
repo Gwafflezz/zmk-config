@@ -6,15 +6,14 @@ Corne layer overlay
 Desenha uma miniatura do *seu* Corne no canto superior direito da tela e troca
 a camada exibida ao vivo, sempre que ela é ativada no teclado.
 
-Como funciona (híbrido USB + BT):
+Como funciona (híbrido USB + BT + Studio + FileWatcher):
   - USB: o firmware (zmk-keypeek-layer-notifier + zmk-raw-hid) envia um report
     Raw HID de 32 bytes com o bitmask das camadas ativas via /dev/hidrawX.
   - BT: os macros `lower_mo`/`raise_mo` no keymap emitem F13/F14 (lower) e
     F15/F16 (raise) ao entrar/sair de cada camada. O overlay escuta via evdev
     (/dev/input/eventX) — funciona igual por USB e Bluetooth.
-  - Ambos os caminhos rodam simultaneamente; qualquer um que conectar dispara
-    a atualização da camada.
-  - O keymap (labels das teclas) é lido localmente do corne.keymap.
+  - ZMK Studio: se conectado via CDC-ACM (/dev/ttyACMx), lê as alterações ao vivo do teclado.
+  - FileWatcher: monitora alterações no arquivo corne.keymap e atualiza a interface instantaneamente.
 
 Uso:
     python3 corne_layer_overlay.py [--keymap CAMINHO] [--always] [--scale N]
@@ -215,6 +214,36 @@ class EvdevReader(threading.Thread):
             except OSError:
                 self._active.clear()
             time.sleep(2)
+
+
+class KeymapFileWatcher(threading.Thread):
+    """Monitora o arquivo corne.keymap no disco e recarrega o overlay se ele for editado."""
+
+    def __init__(self, keymap_path, on_layers):
+        super().__init__(daemon=True)
+        self.keymap_path = keymap_path
+        self.on_layers = on_layers
+        self._stop = threading.Event()
+        self._last_mtime = 0
+
+    def stop(self):
+        self._stop.set()
+
+    def run(self):
+        while not self._stop.is_set():
+            try:
+                if os.path.exists(self.keymap_path):
+                    mtime = os.path.getmtime(self.keymap_path)
+                    if self._last_mtime > 0 and mtime != self._last_mtime:
+                        self._last_mtime = mtime
+                        layers = parse_keymap(self.keymap_path)
+                        if layers:
+                            GLib.idle_add(self.on_layers, layers)
+                    elif self._last_mtime == 0:
+                        self._last_mtime = mtime
+            except OSError:
+                pass
+            time.sleep(1.0)
 
 
 class StudioReader(threading.Thread):
@@ -483,6 +512,10 @@ class StudioReader(threading.Thread):
         if 'bluetooth' in n:        return 'BT'
         if 'bootloader' in n:       return 'Boot'
         if 'reset' in n:            return 'Rst'
+        if 'up' in n and ('mmv' in n or 'mouse' in n or 'move' in n):    return '🖱↑'
+        if 'down' in n and ('mmv' in n or 'mouse' in n or 'move' in n):  return '🖱↓'
+        if 'left' in n and ('mmv' in n or 'mouse' in n or 'move' in n):  return '🖱←'
+        if 'right' in n and ('mmv' in n or 'mouse' in n or 'move' in n): return '🖱→'
         if 'mouse button' in n:     return '🖰'
         if 'mouse move' in n or 'scroll' in n: return '🖱'
         words = beh_map.get(bid, '').split()
@@ -630,6 +663,7 @@ MOUSE_KEYS = {
     "LCLK": "🖰L", "RCLK": "🖰R", "MCLK": "🖰M",
     "MOVE_UP": "🖱↑", "MOVE_DOWN": "🖱↓", "MOVE_LEFT": "🖱←", "MOVE_RIGHT": "🖱→",
     "SCRL_UP": "⇕↑", "SCRL_DOWN": "⇕↓", "SCRL_LEFT": "⇕←", "SCRL_RIGHT": "⇕→",
+    "mmv_td_up": "🖱↑", "mmv_td_down": "🖱↓", "mmv_td_left": "🖱←", "mmv_td_right": "🖱→",
 }
 
 
@@ -675,6 +709,8 @@ def binding_label(tokens):
         return MOUSE_KEYS.get(args[0], args[0])
     if beh == "&msc" and args:
         return MOUSE_KEYS.get(args[0], args[0])
+    if beh in ("&mmv_td_up", "&mmv_td_down", "&mmv_td_left", "&mmv_td_right"):
+        return MOUSE_KEYS.get(beh.lstrip("&"), beh)
     label = beh.lstrip("&")
     if args:
         label += " " + " ".join(args)
@@ -740,7 +776,6 @@ class CornePainter:
         self.row_y0 = self.margin + self.header
         self.thumb_y = self.row_y0 + 3 * (self.kh + self.gap) + 8 * s
 
-        # Pre-instancia descrições de fonte para evitar milhares de objetos Pango
         self.font_desc = Pango.FontDescription()
         self.font_desc.set_family("sans-serif")
         self.font_desc.set_absolute_size(self.font * Pango.SCALE)
@@ -917,23 +952,26 @@ class OverlayWindow(Gtk.ApplicationWindow):
 
 
 class OverlayApp(Gtk.Application):
-    def __init__(self, layers, scale, always):
-        super().__init__(application_id="dev.corne.layeroverlay",
-                         flags=0)
-        self._args = (layers, scale, always)
+    def __init__(self, keymap_path, layers, scale, always):
+        super().__init__(application_id="dev.corne.layeroverlay", flags=0)
+        self.keymap_path = keymap_path
+        self.layers = layers
+        self.scale = scale
+        self.always = always
         self.win = None
-        self.reader = None
 
     def do_activate(self):
         if self.win is None:
-            self.win = OverlayWindow(self, *self._args)
+            self.win = OverlayWindow(self, self.layers, self.scale, self.always)
             self.reader = HidReader(self.win.on_layer)
             self.evdev_reader = EvdevReader(self.win.on_layer)
+            self.file_watcher = KeymapFileWatcher(self.keymap_path, self.win.on_layers)
             self.studio_reader = StudioReader(self.win.on_layers)
             self.reader.start()
             self.evdev_reader.start()
+            self.file_watcher.start()
             self.studio_reader.start()
-        if self._args[2]:
+        if self.always:
             self.win.present()
         else:
             self.win.set_visible(False)
@@ -965,7 +1003,7 @@ def main():
         print("[corne-overlay] aviso: gtk4-layer-shell ausente — usando janela "
               "normal (pode não ficar ancorada/always-on-top no niri).")
 
-    app = OverlayApp(layers, args.scale, args.always)
+    app = OverlayApp(args.keymap, layers, args.scale, args.always)
     app.run(None)
 
 
