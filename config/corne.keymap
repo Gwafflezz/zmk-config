@@ -35,6 +35,33 @@
                 };
         };
 
+        behaviors {
+                mmv_td_up: mmv_tap_dance_up {
+                        compatible = "zmk,behavior-tap-dance";
+                        #binding-cells = <0>;
+                        tapping-term-ms = <200>;
+                        bindings = <&mmv MOVE_Y(-600)>, <&mmv MOVE_Y(-1200)>, <&mmv MOVE_Y(-600)>;
+                };
+                mmv_td_down: mmv_tap_dance_down {
+                        compatible = "zmk,behavior-tap-dance";
+                        #binding-cells = <0>;
+                        tapping-term-ms = <200>;
+                        bindings = <&mmv MOVE_Y(600)>, <&mmv MOVE_Y(1200)>, <&mmv MOVE_Y(600)>;
+                };
+                mmv_td_left: mmv_tap_dance_left {
+                        compatible = "zmk,behavior-tap-dance";
+                        #binding-cells = <0>;
+                        tapping-term-ms = <200>;
+                        bindings = <&mmv MOVE_X(-600)>, <&mmv MOVE_X(-1200)>, <&mmv MOVE_X(-600)>;
+                };
+                mmv_td_right: mmv_tap_dance_right {
+                        compatible = "zmk,behavior-tap-dance";
+                        #binding-cells = <0>;
+                        tapping-term-ms = <200>;
+                        bindings = <&mmv MOVE_X(600)>, <&mmv MOVE_X(1200)>, <&mmv MOVE_X(600)>;
+                };
+        };
+
         macros {
                 // Emite F13 ao entrar na lower (layer 1) e F14 ao sair.
                 // O overlay escuta esses sinais via evdev para funcionar por BT.
@@ -78,13 +105,13 @@
                 };
                 lower_layer {
 // -----------------------------------------------------------------------------------------
-// |  TAB |  1  |  2  |  3  |  4  |  5  |   |  6  |  7  |  8  |  9  |  0  | BSPC |
-// | BTCLR| BT1 | BT2 | BT3 | BT4 | BT5 |   | LFT | DWN |  UP | RGT |     |      |
+// |  TAB |  1  |  2  |  3  |  4  |  5  |   |  6  |  7  |  UP |  9  |  0  | BSPC |
+// | BTCLR| BT1 | BT2 | BT3 | BT4 | BT5 |   |  8  | LFT | DWN | RGT |     |      |
 // | SHFT | TOG | EFF | HUI | SAI | BRI |   | BRD |     |     |     |     |      |
 //                    | GUI |     | ENT |   | SPC |     | ALT |
                         bindings = <
-   &kp TAB    &kp N1          &kp N2          &kp N3          &kp N4          &kp N5            &kp N6          &kp N7     &kp N8     &kp N9     &kp N0     &kp BSPC
-   &bt BT_CLR &bt BT_SEL 0    &bt BT_SEL 1    &bt BT_SEL 2    &bt BT_SEL 3    &bt BT_SEL 4      &kp LEFT        &kp DOWN   &kp UP     &kp RIGHT  &trans     &trans
+   &kp TAB    &kp N1          &kp N2          &kp N3          &kp N4          &kp N5            &kp N6          &kp N7     &kp UP     &kp N9     &kp N0     &kp BSPC
+   &bt BT_CLR &bt BT_SEL 0    &bt BT_SEL 1    &bt BT_SEL 2    &bt BT_SEL 3    &bt BT_SEL 4      &kp N8          &kp LEFT   &kp DOWN   &kp RIGHT  &trans     &trans
    &kp LSHFT  &rgb_ug RGB_TOG &rgb_ug RGB_EFF &rgb_ug RGB_HUI &rgb_ug RGB_SAI &rgb_ug RGB_BRI   &rgb_ug RGB_BRD &trans     &trans     &trans     &trans     &trans
                                               &kp LGUI        &trans          &kp RET           &kp SPACE       &trans     &kp RALT
                         >;
@@ -106,14 +133,14 @@
 
                 mouse_layer {
 // -----------------------------------------------------------------------------------------
-// |      |     |     |     |     |     |   | SCRL| SCRL| SCRL| SCRL|     |      |
-// |      |     | MID | RGHT| LEFT|     |   | LFT | DWN |  UP | RGT |     |      |
+// |      |     |     |     |     |     |   | SCRL| SCRL| UP  | SCRL| SCRL|      |
+// |      |     | MID | RGHT| LEFT|     |   |     | LFT | DWN | RGT |     |      |
 // |      |     |     |     |     |     |   |     |     |     |     |     |      |
 //                    |     |     |     |   |     |     |     |
                         bindings = <
-   &studio_unlock &trans      &trans          &trans          &trans          &trans            &msc SCRL_LEFT  &msc SCRL_DOWN  &msc SCRL_UP    &msc SCRL_RIGHT &trans     &trans
-   &trans     &trans          &mkp MCLK       &mkp RCLK       &mkp LCLK       &trans            &mmv MOVE_LEFT  &mmv MOVE_DOWN  &mmv MOVE_UP    &mmv MOVE_RIGHT &trans     &trans
-   &trans     &trans          &trans          &trans          &trans          &trans            &trans          &trans          &trans          &trans          &trans     &trans
+   &studio_unlock &trans      &trans          &trans          &trans          &trans            &msc SCRL_LEFT  &msc SCRL_DOWN  &mmv_td_up      &msc SCRL_UP    &msc SCRL_RIGHT &trans
+   &trans     &trans          &mkp MCLK       &mkp RCLK       &mkp LCLK       &trans            &trans          &mmv_td_left    &mmv_td_down    &mmv_td_right   &trans          &trans
+   &trans     &trans          &trans          &trans          &trans          &trans            &trans          &trans          &trans          &trans          &trans          &trans
                                               &trans          &trans          &trans            &trans          &trans          &trans
                         >;
                 };
