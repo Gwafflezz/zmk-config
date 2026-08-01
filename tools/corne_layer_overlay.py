@@ -710,6 +710,8 @@ def binding_label(tokens):
         return "L1"
     if beh in ("&raise_mo", "raise_mo"):
         return "L2"
+    if beh in ("&turbo_mo", "turbo_mo"):
+        return "2x"
     if beh in ("&studio_unlock", "studio_unlock"):
         return "🔓"
     if beh == "&kp" and args:
