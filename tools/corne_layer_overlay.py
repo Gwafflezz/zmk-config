@@ -656,6 +656,8 @@ KEY_LABELS = {
     "LEFT": "←", "RIGHT": "→", "UP": "↑", "DOWN": "↓",
     "HOME": "Home", "END": "End", "PG_UP": "PgUp", "PG_DN": "PgDn",
     "C_VOL_UP": "Vol+", "C_VOL_DN": "Vol-", "C_MUTE": "Mute",
+    "C_BRI_UP": "Bri+", "C_BRI_DN": "Bri-", "C_PP": "Play",
+    "PRINTSCREEN": "PrSc", "C_NEXT": "Next", "C_PREV": "Prev",
 }
 for i in range(10):
     KEY_LABELS[f"N{i}"] = str(i)
