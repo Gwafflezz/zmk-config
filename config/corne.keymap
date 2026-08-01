@@ -15,10 +15,10 @@
     chain-length = <27>;
 };
 
-/* Configuração de aceleração nativa do mouse (resposta instantânea a 0ms de lag) */
+/* Remove a rampa de aceleracao interna do ZMK (0ms de atraso na velocidade max) */
 &mmv {
-    time-to-max-speed-ms = <300>;
-    acceleration-exponent = <1>;
+    time-to-max-speed-ms = <0>;
+    acceleration-exponent = <0>;
 };
 
 / {
@@ -38,6 +38,33 @@
                 tri_layer {
                         if-layers = <1 2>;
                         then-layer = <3>;
+                };
+        };
+
+        behaviors {
+                mmv_td_up: mmv_tap_dance_up {
+                        compatible = "zmk,behavior-tap-dance";
+                        #binding-cells = <0>;
+                        tapping-term-ms = <80>;
+                        bindings = <&mmv MOVE_Y(-800)>, <&mmv MOVE_Y(-1600)>, <&mmv MOVE_Y(-800)>;
+                };
+                mmv_td_down: mmv_tap_dance_down {
+                        compatible = "zmk,behavior-tap-dance";
+                        #binding-cells = <0>;
+                        tapping-term-ms = <80>;
+                        bindings = <&mmv MOVE_Y(800)>, <&mmv MOVE_Y(1600)>, <&mmv MOVE_Y(800)>;
+                };
+                mmv_td_left: mmv_tap_dance_left {
+                        compatible = "zmk,behavior-tap-dance";
+                        #binding-cells = <0>;
+                        tapping-term-ms = <80>;
+                        bindings = <&mmv MOVE_X(-800)>, <&mmv MOVE_X(-1600)>, <&mmv MOVE_X(-800)>;
+                };
+                mmv_td_right: mmv_tap_dance_right {
+                        compatible = "zmk,behavior-tap-dance";
+                        #binding-cells = <0>;
+                        tapping-term-ms = <80>;
+                        bindings = <&mmv MOVE_X(800)>, <&mmv MOVE_X(1600)>, <&mmv MOVE_X(800)>;
                 };
         };
 
@@ -118,9 +145,9 @@
 // | CTRL |     |     |     |     |     |   |     |     |     | RGB | BRD | BRI  |
 //                    |     |     |     |   |     |     |     |
                         bindings = <
-   &studio_unlock &trans &trans    &trans    &trans    &trans    &msc SCRL_LEFT  &msc SCRL_DOWN  &mmv MOVE_UP    &msc SCRL_UP    &msc SCRL_RIGHT &trans
-   &kp LSHFT      &trans &mkp MCLK &mkp RCLK &mkp LCLK &trans    &trans          &mmv MOVE_LEFT  &mmv MOVE_DOWN  &mmv MOVE_RIGHT &kp C_NEXT      &kp C_PREV
-   &kp LCTRL      &trans &trans    &trans    &trans    &trans    &trans          &trans          &trans          &rgb_ug RGB_TOG &rgb_ug RGB_BRD &rgb_ug RGB_BRI
+   &studio_unlock &trans &trans    &trans    &trans    &trans    &msc SCRL_LEFT  &msc SCRL_DOWN  &mmv_td_up    &msc SCRL_UP    &msc SCRL_RIGHT &trans
+   &kp LSHFT      &trans &mkp MCLK &mkp RCLK &mkp LCLK &trans    &trans          &mmv_td_left    &mmv_td_down  &mmv_td_right   &kp C_NEXT      &kp C_PREV
+   &kp LCTRL      &trans &trans    &trans    &trans    &trans    &trans          &trans          &trans        &rgb_ug RGB_TOG &rgb_ug RGB_BRD &rgb_ug RGB_BRI
                                    &trans    &trans    &trans    &trans          &trans          &trans
                         >;
                 };
