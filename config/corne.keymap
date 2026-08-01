@@ -10,6 +10,11 @@
 #include <dt-bindings/zmk/ext_power.h>
 #include <dt-bindings/zmk/rgb.h>
 #include <dt-bindings/zmk/pointing.h>
+/* behaviors.dtsi traz behaviors/mouse_keys.dtsi (&mmv, &msc, mmv_input_listener),
+ * mas NAO traz os input processors -- zip_xy_scaler e' declarado em
+ * input/processors.dtsi e precisa deste include separado. Sem ele o &zip_xy_scaler
+ * la' embaixo referencia um label inexistente e o devicetree nao compila. */
+#include <input/processors.dtsi>
 
 &led_strip {
     chain-length = <27>;
