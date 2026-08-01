@@ -15,6 +15,11 @@
     chain-length = <27>;
 };
 
+&mmv {
+    time-to-max-speed-ms = <40>;
+    acceleration-exponent = <0>;
+};
+
 / {
         chosen {
                 zmk,battery = &vbatt;
@@ -39,25 +44,25 @@
                 mmv_td_up: mmv_tap_dance_up {
                         compatible = "zmk,behavior-tap-dance";
                         #binding-cells = <0>;
-                        tapping-term-ms = <200>;
+                        tapping-term-ms = <150>;
                         bindings = <&mmv MOVE_Y(-600)>, <&mmv MOVE_Y(-1200)>, <&mmv MOVE_Y(-600)>;
                 };
                 mmv_td_down: mmv_tap_dance_down {
                         compatible = "zmk,behavior-tap-dance";
                         #binding-cells = <0>;
-                        tapping-term-ms = <200>;
+                        tapping-term-ms = <150>;
                         bindings = <&mmv MOVE_Y(600)>, <&mmv MOVE_Y(1200)>, <&mmv MOVE_Y(600)>;
                 };
                 mmv_td_left: mmv_tap_dance_left {
                         compatible = "zmk,behavior-tap-dance";
                         #binding-cells = <0>;
-                        tapping-term-ms = <200>;
+                        tapping-term-ms = <150>;
                         bindings = <&mmv MOVE_X(-600)>, <&mmv MOVE_X(-1200)>, <&mmv MOVE_X(-600)>;
                 };
                 mmv_td_right: mmv_tap_dance_right {
                         compatible = "zmk,behavior-tap-dance";
                         #binding-cells = <0>;
-                        tapping-term-ms = <200>;
+                        tapping-term-ms = <150>;
                         bindings = <&mmv MOVE_X(600)>, <&mmv MOVE_X(1200)>, <&mmv MOVE_X(600)>;
                 };
         };

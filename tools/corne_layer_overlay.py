@@ -656,8 +656,8 @@ KEY_LABELS = {
     "LEFT": "←", "RIGHT": "→", "UP": "↑", "DOWN": "↓",
     "HOME": "Home", "END": "End", "PG_UP": "PgUp", "PG_DN": "PgDn",
     "C_VOL_UP": "Vol+", "C_VOL_DN": "Vol-", "C_MUTE": "Mute",
-    "C_BRI_UP": "Bri+", "C_BRI_DN": "Bri-", "C_PP": "Play",
-    "PRINTSCREEN": "PrSc", "C_NEXT": "Next", "C_PREV": "Prev",
+    "C_BRI_UP": "☀️+", "C_BRI_DN": "☀️-", "C_PP": "⏯",
+    "PRINTSCREEN": "PrSc", "C_NEXT": "⏭", "C_PREV": "⏮",
 }
 for i in range(10):
     KEY_LABELS[f"N{i}"] = str(i)
@@ -667,7 +667,7 @@ for c in "ABCDEFGHIJKLMNOPQRSTUVWXYZ":
 RGB_LABELS = {
     "RGB_TOG": "RGB⏻", "RGB_EFF": "RGB+", "RGB_EFR": "RGB-",
     "RGB_HUI": "Hue+", "RGB_HUD": "Hue-", "RGB_SAI": "Sat+", "RGB_SAD": "Sat-",
-    "RGB_BRI": "Bri+", "RGB_BRD": "Bri-", "RGB_SPI": "Spd+", "RGB_SPD": "Spd-",
+    "RGB_BRI": "RGB_Bri+", "RGB_BRD": "RGB_Bri-", "RGB_SPI": "Spd+", "RGB_SPD": "Spd-",
 }
 MOUSE_KEYS = {
     "LCLK": "🖰L", "RCLK": "🖰R", "MCLK": "🖰M",
