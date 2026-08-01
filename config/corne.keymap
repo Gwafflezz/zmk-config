@@ -88,7 +88,8 @@
                                  ;
                 };
 
-                // Turbo momentaneo do Ç, montado com &tog em vez de &mo.
+                // Turbo momentaneo da tecla / (camadas de mouse), montado
+                // com &tog em vez de &mo.
                 // Na bancada o &tog 4 sobe a camada 4 com o cursor em
                 // movimento, e o &mo 4 nao sobe. Entao o momentaneo e'
                 // construido a partir da primitiva que funciona: liga no
@@ -154,19 +155,20 @@
                 mouse_layer {
 // -----------------------------------------------------------------------------------------
 // | UNLOK| NONE| NONE| NONE| NONE| NONE|   | SCRL| SCRL|  UP | SCRL| SCRL| NONE |
-// | SHFT | NONE| MID | RGHT| LEFT| NONE|   | NONE| LFT | DWN | RGT | TURB| PREV |
-// | CTRL | NONE| NONE| NONE| NONE| NONE|   | NONE| NONE| NONE| RGB | BRD | BRI  |
+// | SHFT | NONE| MID | RGHT| LEFT| NONE|   | NONE| LFT | DWN | RGT | NONE| PREV |
+// | CTRL | NONE| NONE| NONE| NONE| NONE|   | NONE| NONE| NONE| RGB | TURB| BRI  |
 //                    | NONE| BASE| NONE|   | NONE| NONE| NONE|
 //
 // Comportamento: polegares pressionados = camada ativa. Cursor movendo +
-// segura Ç = velocidade dobra (scaler na camada 4); solta Ç = volta ao
-// normal; solta polegar ou seta = movimento para. Nada mais.
-// A camada 3 e' condicional (LWR+RSE): o Ç so' resolve aqui com os polegares
-// seguros -- sem eles o press cai na camada 0 e digita RA(C).
+// segura / (TURB) = velocidade dobra (scaler na camada 4); solta / = volta
+// ao normal; solta polegar ou seta = movimento para. Nada mais.
+// O turbo saiu da posicao do Ç: la' toda alteracao compilada era ignorada
+// (sintoma: imprimia © = RA(C) da base), suspeita de override do ZMK Studio
+// gravado na EEPROM sobre aquele slot. A posicao do / obedece ao keymap.
                         bindings = <
    &studio_unlock &none &none    &none    &none    &none    &msc SCRL_LEFT  &msc SCRL_DOWN  &mmv MOVE_Y(-600) &msc SCRL_UP    &msc SCRL_RIGHT &none
-   &kp LSHFT      &none &mkp MCLK &mkp RCLK &mkp LCLK &none    &none           &mmv MOVE_X(-600) &mmv MOVE_Y(600) &mmv MOVE_X(600) &turbo_mo       &kp C_PREV
-   &kp LCTRL      &none &none    &none    &none    &none    &none           &none           &none            &rgb_ug RGB_TOG &rgb_ug RGB_BRD &rgb_ug RGB_BRI
+   &kp LSHFT      &none &mkp MCLK &mkp RCLK &mkp LCLK &none    &none           &mmv MOVE_X(-600) &mmv MOVE_Y(600) &mmv MOVE_X(600) &none           &kp C_PREV
+   &kp LCTRL      &none &none    &none    &none    &none    &none           &none           &none            &rgb_ug RGB_TOG &turbo_mo       &rgb_ug RGB_BRI
                                  &none    &to 0    &none    &none           &none           &none
                         >;
                 };
@@ -180,17 +182,17 @@
 // dessincronizado), nao ha' fallthrough para a camada 0 vazando letras -- e o
 // polegar BASE (&to 0) continua sendo a saida garantida.
 // | UNLOK| NONE| NONE| NONE| NONE| NONE|   | SCRL| SCRL|  UP | SCRL| SCRL| NONE |
-// | SHFT | NONE| MID | RGHT| LEFT| NONE|   | NONE| LFT | DWN | RGT | TURB| PREV |
-// | CTRL | NONE| NONE| NONE| NONE| NONE|   | NONE| NONE| NONE| RGB | BRD | BRI  |
+// | SHFT | NONE| MID | RGHT| LEFT| NONE|   | NONE| LFT | DWN | RGT | NONE| PREV |
+// | CTRL | NONE| NONE| NONE| NONE| NONE|   | NONE| NONE| NONE| RGB | TURB| BRI  |
 //                    | NONE| BASE| NONE|   | NONE| NONE| NONE|
 //
-// O Ç aqui tambem e' &turbo_mo (espelhando a camada 3): qualquer press com a
+// O / aqui tambem e' &turbo_mo (espelhando a camada 3): qualquer press com a
 // camada 4 ja' ativa mantem os taps de &tog pareados por instancia em vez de
 // dessincronizar.
                         bindings = <
    &studio_unlock &none &none    &none    &none    &none    &msc SCRL_LEFT  &msc SCRL_DOWN  &mmv MOVE_Y(-600) &msc SCRL_UP    &msc SCRL_RIGHT &none
-   &kp LSHFT      &none &mkp MCLK &mkp RCLK &mkp LCLK &none    &none           &mmv MOVE_X(-600) &mmv MOVE_Y(600) &mmv MOVE_X(600) &turbo_mo       &kp C_PREV
-   &kp LCTRL      &none &none    &none    &none    &none    &none           &none           &none            &rgb_ug RGB_TOG &rgb_ug RGB_BRD &rgb_ug RGB_BRI
+   &kp LSHFT      &none &mkp MCLK &mkp RCLK &mkp LCLK &none    &none           &mmv MOVE_X(-600) &mmv MOVE_Y(600) &mmv MOVE_X(600) &none           &kp C_PREV
+   &kp LCTRL      &none &none    &none    &none    &none    &none           &none           &none            &rgb_ug RGB_TOG &turbo_mo       &rgb_ug RGB_BRI
                                  &none    &to 0    &none    &none           &none           &none
                         >;
                 };
