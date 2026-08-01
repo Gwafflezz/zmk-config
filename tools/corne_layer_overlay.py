@@ -977,11 +977,9 @@ class OverlayApp(Gtk.Application):
             self.reader = HidReader(self.win.on_layer)
             self.evdev_reader = EvdevReader(self.win.on_layer)
             self.file_watcher = KeymapFileWatcher(self.keymap_path, self.win.on_layers)
-            self.studio_reader = StudioReader(self.win.on_layers)
             self.reader.start()
             self.evdev_reader.start()
             self.file_watcher.start()
-            self.studio_reader.start()
         if self.always:
             self.win.present()
         else:
