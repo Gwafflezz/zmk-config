@@ -154,19 +154,18 @@
                 mouse_layer {
 // -----------------------------------------------------------------------------------------
 // | UNLOK| NONE| NONE| NONE| NONE| NONE|   | SCRL| SCRL|  UP | SCRL| SCRL| NONE |
-// | SHFT | NONE| MID | RGHT| LEFT| NONE|   | STIK| LFT | DWN | RGT | TURB| PREV |
+// | SHFT | NONE| MID | RGHT| LEFT| NONE|   | NONE| LFT | DWN | RGT | TURB| PREV |
 // | CTRL | NONE| NONE| NONE| NONE| NONE|   | NONE| NONE| NONE| RGB | BRD | BRI  |
 //                    | NONE| BASE| NONE|   | NONE| NONE| NONE|
 //
-// TURB (Ç) = &turbo_mo: segura acelera 2x, solta volta ao normal.
-// STIK (H) = &tog 5: trava o modo mouse na camada 5 (clone desta), que
-// sobrevive ao soltar dos polegares. Sem isso, soltar LWR+RSE derruba a
-// camada 3 mesmo com o cursor ainda deslizando (a instancia do &mmv da tecla
-// segurada sobrevive), e o proximo press resolve na camada 0 -- foi assim que
-// o Ç "nao funcionava": imprimia © porque o press caia no RA(C) da base.
+// Comportamento: polegares pressionados = camada ativa. Cursor movendo +
+// segura Ç = velocidade dobra (scaler na camada 4); solta Ç = volta ao
+// normal; solta polegar ou seta = movimento para. Nada mais.
+// A camada 3 e' condicional (LWR+RSE): o Ç so' resolve aqui com os polegares
+// seguros -- sem eles o press cai na camada 0 e digita RA(C).
                         bindings = <
    &studio_unlock &none &none    &none    &none    &none    &msc SCRL_LEFT  &msc SCRL_DOWN  &mmv MOVE_Y(-600) &msc SCRL_UP    &msc SCRL_RIGHT &none
-   &kp LSHFT      &none &mkp MCLK &mkp RCLK &mkp LCLK &none    &tog 5          &mmv MOVE_X(-600) &mmv MOVE_Y(600) &mmv MOVE_X(600) &turbo_mo       &kp C_PREV
+   &kp LSHFT      &none &mkp MCLK &mkp RCLK &mkp LCLK &none    &none           &mmv MOVE_X(-600) &mmv MOVE_Y(600) &mmv MOVE_X(600) &turbo_mo       &kp C_PREV
    &kp LCTRL      &none &none    &none    &none    &none    &none           &none           &none            &rgb_ug RGB_TOG &rgb_ug RGB_BRD &rgb_ug RGB_BRI
                                  &none    &to 0    &none    &none           &none           &none
                         >;
@@ -181,38 +180,16 @@
 // dessincronizado), nao ha' fallthrough para a camada 0 vazando letras -- e o
 // polegar BASE (&to 0) continua sendo a saida garantida.
 // | UNLOK| NONE| NONE| NONE| NONE| NONE|   | SCRL| SCRL|  UP | SCRL| SCRL| NONE |
-// | SHFT | NONE| MID | RGHT| LEFT| NONE|   | STIK| LFT | DWN | RGT | TURB| PREV |
+// | SHFT | NONE| MID | RGHT| LEFT| NONE|   | NONE| LFT | DWN | RGT | TURB| PREV |
 // | CTRL | NONE| NONE| NONE| NONE| NONE|   | NONE| NONE| NONE| RGB | BRD | BRI  |
 //                    | NONE| BASE| NONE|   | NONE| NONE| NONE|
 //
 // O Ç aqui tambem e' &turbo_mo (espelhando a camada 3): qualquer press com a
 // camada 4 ja' ativa mantem os taps de &tog pareados por instancia em vez de
-// dessincronizar. Mesmo desenho que funcionou no H em ccac273.
+// dessincronizar.
                         bindings = <
    &studio_unlock &none &none    &none    &none    &none    &msc SCRL_LEFT  &msc SCRL_DOWN  &mmv MOVE_Y(-600) &msc SCRL_UP    &msc SCRL_RIGHT &none
-   &kp LSHFT      &none &mkp MCLK &mkp RCLK &mkp LCLK &none    &tog 5          &mmv MOVE_X(-600) &mmv MOVE_Y(600) &mmv MOVE_X(600) &turbo_mo       &kp C_PREV
-   &kp LCTRL      &none &none    &none    &none    &none    &none           &none           &none            &rgb_ug RGB_TOG &rgb_ug RGB_BRD &rgb_ug RGB_BRI
-                                 &none    &to 0    &none    &none           &none           &none
-                        >;
-                };
-
-                sticky_mouse_layer {
-// -----------------------------------------------------------------------------------------
-// Clone da camada 3 que NAO depende do conditional_layers: e' ativada por
-// &tog 5 (tap no H da camada 3) e por isso sobrevive ao soltar dos polegares.
-// E' aqui que o gesto real de mouse acontece: entra pelos polegares, trava com
-// H, solta os polegares e navega. O Ç (&turbo_mo) resolve nesta camada e o
-// turbo funciona sem depender de LWR+RSE seguros.
-//
-// Saidas auditadas (regra anti-lockout): H (&tog 5, a propria) e o polegar
-// BASE (&to 0). Duas rotas independentes que baixam o estado de camada.
-// | UNLOK| NONE| NONE| NONE| NONE| NONE|   | SCRL| SCRL|  UP | SCRL| SCRL| NONE |
-// | SHFT | NONE| MID | RGHT| LEFT| NONE|   | STIK| LFT | DWN | RGT | TURB| PREV |
-// | CTRL | NONE| NONE| NONE| NONE| NONE|   | NONE| NONE| NONE| RGB | BRD | BRI  |
-//                    | NONE| BASE| NONE|   | NONE| NONE| NONE|
-                        bindings = <
-   &studio_unlock &none &none    &none    &none    &none    &msc SCRL_LEFT  &msc SCRL_DOWN  &mmv MOVE_Y(-600) &msc SCRL_UP    &msc SCRL_RIGHT &none
-   &kp LSHFT      &none &mkp MCLK &mkp RCLK &mkp LCLK &none    &tog 5          &mmv MOVE_X(-600) &mmv MOVE_Y(600) &mmv MOVE_X(600) &turbo_mo       &kp C_PREV
+   &kp LSHFT      &none &mkp MCLK &mkp RCLK &mkp LCLK &none    &none           &mmv MOVE_X(-600) &mmv MOVE_Y(600) &mmv MOVE_X(600) &turbo_mo       &kp C_PREV
    &kp LCTRL      &none &none    &none    &none    &none    &none           &none           &none            &rgb_ug RGB_TOG &rgb_ug RGB_BRD &rgb_ug RGB_BRI
                                  &none    &to 0    &none    &none           &none           &none
                         >;
