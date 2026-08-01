@@ -722,6 +722,10 @@ def binding_label(tokens):
     if beh == "&mkp" and args:
         return MOUSE_KEYS.get(args[0], args[0])
     if beh == "&mmv" and args:
+        if args[0] == "MOVE_Y(-1200)": return "🖱↑ 2x"
+        if args[0] == "MOVE_Y(1200)":  return "🖱↓ 2x"
+        if args[0] == "MOVE_X(-1200)": return "🖱← 2x"
+        if args[0] == "MOVE_X(1200)":  return "🖱→ 2x"
         return MOUSE_KEYS.get(args[0], args[0])
     if beh == "&msc" and args:
         return MOUSE_KEYS.get(args[0], args[0])
@@ -771,6 +775,7 @@ LAYER_COLORS = [
     (0.20, 0.55, 0.45),
     (0.62, 0.38, 0.25),
     (0.50, 0.32, 0.60),
+    (0.70, 0.25, 0.35),
 ]
 
 
