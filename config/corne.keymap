@@ -141,12 +141,12 @@
 // -----------------------------------------------------------------------------------------
 // | UNLOK|     |     |     |     |     |   | SCRL| SCRL|  UP | SCRL| SCRL|      |
 // | SHFT |     | MID | RGHT| LEFT|     |   |     | LFT | DWN | RGT | NEXT| PREV |
-// | CTRL |     |     |     |     |     |   | RGB | BRD | BRI |     |     |      |
+// | CTRL |     |     |     |     |     |   |     |     |     | RGB | BRD | BRI  |
 //                    |     |     |     |   |     |     |     |
                         bindings = <
    &studio_unlock &trans &trans    &trans    &trans    &trans    &msc SCRL_LEFT  &msc SCRL_DOWN  &mmv_td_up    &msc SCRL_UP    &msc SCRL_RIGHT &trans
    &kp LSHFT      &trans &mkp MCLK &mkp RCLK &mkp LCLK &trans    &trans          &mmv_td_left    &mmv_td_down  &mmv_td_right   &kp C_NEXT      &kp C_PREV
-   &kp LCTRL      &trans &trans    &trans    &trans    &trans    &rgb_ug RGB_TOG &rgb_ug RGB_BRD &rgb_ug RGB_BRI &trans        &trans          &trans
+   &kp LCTRL      &trans &trans    &trans    &trans    &trans    &trans          &trans          &trans        &rgb_ug RGB_TOG &rgb_ug RGB_BRD &rgb_ug RGB_BRI
                                    &trans    &trans    &trans    &trans          &trans          &trans
                         >;
                 };
