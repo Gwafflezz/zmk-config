@@ -1,0 +1,6 @@
+# Checkout local do ZMK/Zephyr (o firmware e' construido pelo GitHub Actions)
+.zmk/
+
+# Bytecode do overlay em tools/
+__pycache__/
+*.pyc
