@@ -15,10 +15,10 @@
     chain-length = <27>;
 };
 
-/* Rampa de aceleração de velocidade para 100ms */
+/* Resposta instantanea sem ramp-up / sem dampening */
 &mmv {
-    time-to-max-speed-ms = <100>;
-    acceleration-exponent = <1>;
+    time-to-max-speed-ms = <0>;
+    acceleration-exponent = <0>;
 };
 
 / {
@@ -114,28 +114,42 @@
                 mouse_layer {
 // -----------------------------------------------------------------------------------------
 // | UNLOK|     |     |     |     |     |   | SCRL| SCRL|  UP | SCRL| SCRL|      |
-// | SHFT |     | MID | RGHT| LEFT|     |   |     | LFT | DWN | RGT | 2X  | PREV |
+// | SHFT |     | MID | RGHT| LEFT|     |   | DPI | LFT | DWN | RGT | TURB| PREV |
 // | CTRL |     |     |     |     |     |   |     |     |     | RGB | BRD | BRI  |
 //                    |     |     |     |   |     |     |     |
                         bindings = <
-   &studio_unlock &trans &trans    &trans    &trans    &trans    &msc SCRL_LEFT  &msc SCRL_DOWN  &mmv MOVE_UP    &msc SCRL_UP    &msc SCRL_RIGHT &trans
-   &kp LSHFT      &trans &mkp MCLK &mkp RCLK &mkp LCLK &trans    &trans          &mmv MOVE_LEFT  &mmv MOVE_DOWN  &mmv MOVE_RIGHT &mo 4           &kp C_PREV
-   &kp LCTRL      &trans &trans    &trans    &trans    &trans    &trans          &trans          &trans          &rgb_ug RGB_TOG &rgb_ug RGB_BRD &rgb_ug RGB_BRI
+   &studio_unlock &trans &trans    &trans    &trans    &trans    &msc SCRL_LEFT  &msc SCRL_DOWN  &mmv MOVE_Y(-600) &msc SCRL_UP    &msc SCRL_RIGHT &trans
+   &kp LSHFT      &trans &mkp MCLK &mkp RCLK &mkp LCLK &trans    &to 4           &mmv MOVE_X(-600) &mmv MOVE_Y(600) &mmv MOVE_X(600) &mo 4           &kp C_PREV
+   &kp LCTRL      &trans &trans    &trans    &trans    &trans    &trans          &trans          &trans           &rgb_ug RGB_TOG &rgb_ug RGB_BRD &rgb_ug RGB_BRI
                                    &trans    &trans    &trans    &trans          &trans          &trans
                         >;
                 };
 
                 fast_mouse_layer {
 // -----------------------------------------------------------------------------------------
-// |      |     |     |     |     |     |   |     |     | UP2X|     |     |      |
-// |      |     |     |     |     |     |   |     |LFT2X|DWN2X|RGT2X|     |      |
-// |      |     |     |     |     |     |   |     |     |     |     |     |      |
+// | UNLOK|     |     |     |     |     |   | SCRL| SCRL| UP2X| SCRL| SCRL|      |
+// | SHFT |     | MID | RGHT| LEFT|     |   | DPI |LFT2X|DWN2X|RGT2X| TURB| PREV |
+// | CTRL |     |     |     |     |     |   |     |     |     | RGB | BRD | BRI  |
 //                    |     |     |     |   |     |     |     |
                         bindings = <
-   &trans &trans &trans &trans &trans &trans   &trans &trans          &mmv MOVE_Y(-1200) &trans          &trans &trans
-   &trans &trans &trans &trans &trans &trans   &trans &mmv MOVE_X(-1200) &mmv MOVE_Y(1200)  &mmv MOVE_X(1200) &trans &trans
-   &trans &trans &trans &trans &trans &trans   &trans &trans          &trans             &trans          &trans &trans
-                        &trans &trans &trans   &trans &trans          &trans
+   &studio_unlock &trans &trans    &trans    &trans    &trans    &msc SCRL_LEFT  &msc SCRL_DOWN  &mmv MOVE_Y(-1800) &msc SCRL_UP    &msc SCRL_RIGHT &trans
+   &kp LSHFT      &trans &mkp MCLK &mkp RCLK &mkp LCLK &trans    &to 5           &mmv MOVE_X(-1800) &mmv MOVE_Y(1800) &mmv MOVE_X(1800) &trans         &kp C_PREV
+   &kp LCTRL      &trans &trans    &trans    &trans    &trans    &trans          &trans          &trans             &rgb_ug RGB_TOG &rgb_ug RGB_BRD &rgb_ug RGB_BRI
+                                   &trans    &trans    &trans    &trans          &trans          &trans
+                        >;
+                };
+
+                ultra_mouse_layer {
+// -----------------------------------------------------------------------------------------
+// | UNLOK|     |     |     |     |     |   | SCRL| SCRL| UP3X| SCRL| SCRL|      |
+// | SHFT |     | MID | RGHT| LEFT|     |   | DPI |LFT3X|DWN3X|RGT3X| TURB| PREV |
+// | CTRL |     |     |     |     |     |   |     |     |     | RGB | BRD | BRI  |
+//                    |     |     |     |   |     |     |     |
+                        bindings = <
+   &studio_unlock &trans &trans    &trans    &trans    &trans    &msc SCRL_LEFT  &msc SCRL_DOWN  &mmv MOVE_Y(-3000) &msc SCRL_UP    &msc SCRL_RIGHT &trans
+   &kp LSHFT      &trans &mkp MCLK &mkp RCLK &mkp LCLK &trans    &to 3           &mmv MOVE_X(-3000) &mmv MOVE_Y(3000) &mmv MOVE_X(3000) &trans         &kp C_PREV
+   &kp LCTRL      &trans &trans    &trans    &trans    &trans    &trans          &trans          &trans             &rgb_ug RGB_TOG &rgb_ug RGB_BRD &rgb_ug RGB_BRI
+                                   &trans    &trans    &trans    &trans          &trans          &trans
                         >;
                 };
         };
