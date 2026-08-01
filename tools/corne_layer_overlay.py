@@ -685,6 +685,12 @@ def binding_label(tokens):
         return ""
     if beh in ("&none",):
         return "✗"
+    if beh in ("&lower_mo", "lower_mo"):
+        return "L1"
+    if beh in ("&raise_mo", "raise_mo"):
+        return "L2"
+    if beh in ("&studio_unlock", "studio_unlock"):
+        return "🔓"
     if beh == "&kp" and args:
         return _kp_label(args[0])
     if beh == "&mo" and args:
@@ -709,7 +715,7 @@ def binding_label(tokens):
         return MOUSE_KEYS.get(args[0], args[0])
     if beh == "&msc" and args:
         return MOUSE_KEYS.get(args[0], args[0])
-    if beh in ("&mmv_td_up", "&mmv_td_down", "&mmv_td_left", "&mmv_td_right"):
+    if beh in ("&mmv_td_up", "&mmv_td_down", "&mmv_td_left", "&mmv_td_right", "mmv_td_up", "mmv_td_down", "mmv_td_left", "mmv_td_right"):
         return MOUSE_KEYS.get(beh.lstrip("&"), beh)
     label = beh.lstrip("&")
     if args:
