@@ -957,7 +957,7 @@ class OverlayWindow(Gtk.ApplicationWindow):
                 self._hide_source = None
                 gc.collect()
                 return False
-            self._hide_source = GLib.timeout_add(1000, _hide)
+            self._hide_source = GLib.timeout_add(800, _hide)
 
         return False
 
