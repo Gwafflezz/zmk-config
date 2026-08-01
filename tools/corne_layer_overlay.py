@@ -676,6 +676,17 @@ MOUSE_KEYS = {
     "mmv_td_up": "🖱↑", "mmv_td_down": "🖱↓", "mmv_td_left": "🖱←", "mmv_td_right": "🖱→",
 }
 
+# &mmv carrega a velocidade no proprio argumento (MOVE_Y(-1800)), entao o rotulo
+# sai do par eixo/sinal + o nivel correspondente aa velocidade. Nova camada de
+# velocidade = uma linha em _MOVE_TIERS; sem entrada, o rotulo mostra o valor
+# cru ao lado da seta em vez de vazar "MOVE_Y(-3000)" para dentro da tecla.
+_MOVE_RE = re.compile(r"MOVE_([XY])\((-?\d+)\)")
+_MOVE_ARROWS = {
+    ("X", True): "🖱←", ("X", False): "🖱→",
+    ("Y", True): "🖱↑", ("Y", False): "🖱↓",
+}
+_MOVE_TIERS = {600: "", 1800: " 2x", 2000: " 2x", 3000: " 3x"}
+
 
 def _kp_label(code):
     m = re.fullmatch(r"[LR][ACGS]\((.+)\)", code)
@@ -722,14 +733,12 @@ def binding_label(tokens):
     if beh == "&mkp" and args:
         return MOUSE_KEYS.get(args[0], args[0])
     if beh == "&mmv" and args:
-        if args[0] in ("MOVE_Y(-600)", "MOVE_UP"): return "🖱↑"
-        if args[0] in ("MOVE_Y(600)", "MOVE_DOWN"): return "🖱↓"
-        if args[0] in ("MOVE_X(-600)", "MOVE_LEFT"): return "🖱←"
-        if args[0] in ("MOVE_X(600)", "MOVE_RIGHT"): return "🖱→"
-        if args[0] in ("MOVE_Y(-2000)", "MOVE_Y(-1800)"): return "🖱↑ 2x"
-        if args[0] in ("MOVE_Y(2000)", "MOVE_Y(1800)"):  return "🖱↓ 2x"
-        if args[0] in ("MOVE_X(-2000)", "MOVE_X(-1800)"): return "🖱← 2x"
-        if args[0] in ("MOVE_X(2000)", "MOVE_X(1800)"):  return "🖱→ 2x"
+        m = _MOVE_RE.fullmatch(args[0])
+        if m:
+            speed = int(m.group(2))
+            arrow = _MOVE_ARROWS[(m.group(1), speed < 0)]
+            tier = _MOVE_TIERS.get(abs(speed))
+            return arrow + (f" ({abs(speed)})" if tier is None else tier)
         return MOUSE_KEYS.get(args[0], args[0])
     if beh == "&msc" and args:
         return MOUSE_KEYS.get(args[0], args[0])
