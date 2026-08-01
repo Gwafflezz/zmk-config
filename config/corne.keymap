@@ -137,14 +137,19 @@
                 mouse_layer {
 // -----------------------------------------------------------------------------------------
 // | UNLOK| NONE| NONE| NONE| NONE| NONE|   | SCRL| SCRL|  UP | SCRL| SCRL| NONE |
-// | SHFT | NONE| MID | RGHT| LEFT| NONE|   | LOCK| LFT | DWN | RGT | TURB| PREV |
+// | SHFT | NONE| MID | RGHT| LEFT| TURB|   | LOCK| LFT | DWN | RGT | TURB| PREV |
 // | CTRL | NONE| NONE| NONE| NONE| NONE|   | NONE| NONE| NONE| RGB | BRD | BRI  |
 //                    | NONE| BASE| NONE|   | NONE| NONE| NONE|
 //
-// TURB (Ç) = &mo 4, turbo momentaneo. LOCK (H) = &tog 4, turbo travado.
+// LOCK (H) = &tog 4, turbo travado. TURB = &mo 4, turbo momentaneo -- em DUAS
+// teclas de proposito: o Ç (mindinho direito) e o G (indicador esquerdo). A mao
+// direita ja' segura RSE no polegar e IJKL nos dedos; a esquerda so' tem o
+// polegar ocupado. Se o G acelerar e o Ç nao, o problema e' alcance/rollover na
+// mao direita, nao o &mo. Se nenhum dos dois acelerar, o &mo 4 e' que nao sobe
+// a camada 4 -- e o proximo passo e' outro.
                         bindings = <
    &studio_unlock &none &none    &none    &none    &none    &msc SCRL_LEFT  &msc SCRL_DOWN  &mmv MOVE_Y(-600) &msc SCRL_UP    &msc SCRL_RIGHT &none
-   &kp LSHFT      &none &mkp MCLK &mkp RCLK &mkp LCLK &none    &tog 4          &mmv MOVE_X(-600) &mmv MOVE_Y(600) &mmv MOVE_X(600) &mo 4           &kp C_PREV
+   &kp LSHFT      &none &mkp MCLK &mkp RCLK &mkp LCLK &mo 4    &tog 4          &mmv MOVE_X(-600) &mmv MOVE_Y(600) &mmv MOVE_X(600) &mo 4           &kp C_PREV
    &kp LCTRL      &none &none    &none    &none    &none    &none           &none           &none            &rgb_ug RGB_TOG &rgb_ug RGB_BRD &rgb_ug RGB_BRI
                                  &none    &to 0    &none    &none           &none           &none
                         >;
