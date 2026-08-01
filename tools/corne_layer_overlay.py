@@ -726,14 +726,10 @@ def binding_label(tokens):
         if args[0] in ("MOVE_Y(600)", "MOVE_DOWN"): return "🖱↓"
         if args[0] in ("MOVE_X(-600)", "MOVE_LEFT"): return "🖱←"
         if args[0] in ("MOVE_X(600)", "MOVE_RIGHT"): return "🖱→"
-        if args[0] == "MOVE_Y(-1800)": return "🖱↑ 2x"
-        if args[0] == "MOVE_Y(1800)":  return "🖱↓ 2x"
-        if args[0] == "MOVE_X(-1800)": return "🖱← 2x"
-        if args[0] == "MOVE_X(1800)":  return "🖱→ 2x"
-        if args[0] == "MOVE_Y(-3000)": return "🖱↑ 3x"
-        if args[0] == "MOVE_Y(3000)":  return "🖱↓ 3x"
-        if args[0] == "MOVE_X(-3000)": return "🖱← 3x"
-        if args[0] == "MOVE_X(3000)":  return "🖱→ 3x"
+        if args[0] in ("MOVE_Y(-2000)", "MOVE_Y(-1800)"): return "🖱↑ 2x"
+        if args[0] in ("MOVE_Y(2000)", "MOVE_Y(1800)"):  return "🖱↓ 2x"
+        if args[0] in ("MOVE_X(-2000)", "MOVE_X(-1800)"): return "🖱← 2x"
+        if args[0] in ("MOVE_X(2000)", "MOVE_X(1800)"):  return "🖱→ 2x"
         return MOUSE_KEYS.get(args[0], args[0])
     if beh == "&msc" and args:
         return MOUSE_KEYS.get(args[0], args[0])
