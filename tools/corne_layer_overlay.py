@@ -475,13 +475,13 @@ class StudioReader(threading.Thread):
         49:'\\',51:';',52:"'",53:'`',54:',',55:'.',56:'/', 70:'BT⌫', 84:'/',
         58:'F1',59:'F2',60:'F3',61:'F4',62:'F5',63:'F6',
         64:'F7',65:'F8',66:'F9',67:'F10',68:'F11',69:'F12',
+        70:'PrSc', 74:'Home',75:'PgUp',76:'⌦',77:'End',78:'PgDn',
+        79:'→',80:'←',81:'↓',82:'↑',
         94:'BT0',95:'BT1',96:'BT2',97:'BT3',98:'BT4',
         104:'F13',105:'F14',106:'F15',107:'F16',
-        76:'⌦',79:'→',80:'←',81:'↓',82:'↑',
-        74:'Home',75:'PgUp',77:'End',78:'PgDn',
         127:'Mute',128:'Vol+',129:'Vol-',
         224:'Ctrl',225:'⇧',226:'Alt',227:'Gui',
-        228:'Ctrl',229:'⇧',230:'Alt',231:'Gui',
+        228:'Ctrl',229:'⇧',230:'AltG',231:'Gui',
     }
     _CS = {
         0x6F:'Bri+', 0x70:'Bri-', 0x79:'Next', 0x7A:'Prev',
@@ -505,15 +505,18 @@ class StudioReader(threading.Thread):
         if n in ('none', '&none'): return '✗'
         if 'key press' in n:        return self._hid_label(p1)
         if 'momentary layer' in n:  return f'L{p1}'
-        if 'layer tap' in n:        return f'L{p1}/{self._hid_label(p2)}'
+        if 'layer tap' in n:
+            label2 = self._hid_label(p2)
+            return f'L{p1}/{label2}' if label2 else f'L{p1}'
         if 'hold-tap' in n or 'mod tap' in n or 'mod-tap' in n:
             return f'{self._hid_label(p1)}/{self._hid_label(p2)}'
         if 'toggle layer' in n:     return f'⇉{p1}'
-        if 'sticky layer' in n or 'sticky key' in n: return f'sk{p1}'
+        if 'sticky layer' in n or 'sticky key' in n:
+            return f'sk/{self._hid_label(p1)}' if p1 else 'sk'
         if 'studio unlock' in n:    return '🔓'
         if 'lower' in n:            return 'L1'
         if 'raise' in n:            return 'L2'
-        if 'rgb' in n:              return 'RGB'
+        if 'rgb' in n or 'underglow' in n: return 'RGB'
         if 'bluetooth' in n:        return 'BT'
         if 'bootloader' in n:       return 'Boot'
         if 'reset' in n:            return 'Rst'
@@ -977,9 +980,11 @@ class OverlayApp(Gtk.Application):
             self.reader = HidReader(self.win.on_layer)
             self.evdev_reader = EvdevReader(self.win.on_layer)
             self.file_watcher = KeymapFileWatcher(self.keymap_path, self.win.on_layers)
+            self.studio_reader = StudioReader(self.win.on_layers)
             self.reader.start()
             self.evdev_reader.start()
             self.file_watcher.start()
+            self.studio_reader.start()
         if self.always:
             self.win.present()
         else:
