@@ -716,8 +716,10 @@ def binding_label(tokens):
         return _kp_label(args[0])
     if beh == "&mo" and args:
         return f"L{args[0]}"
-    if beh in ("&to", "&tog") and args:
+    if beh == "&to" and args:
         return f"⇉{args[0]}"
+    if beh == "&tog" and args:
+        return f"⇄{args[0]}"
     if beh == "&lt" and len(args) >= 2:
         return f"L{args[0]}/{_kp_label(args[1])}"
     if beh == "&mt" and len(args) >= 2:
