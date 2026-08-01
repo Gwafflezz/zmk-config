@@ -21,6 +21,24 @@
     acceleration-exponent = <0>;
 };
 
+/* Turbo (camada 4): dobra o deslocamento do cursor enquanto a camada estiver
+ * ativa.
+ *
+ * Precisa ser um input processor, nao bindings mais rapidos numa camada. O ZMK
+ * resolve o binding de uma tecla uma unica vez, no press, e o &mmv fica preso
+ * ao valor com que foi instanciado ate' o release -- entao trocar de camada com
+ * uma tecla de movimento ja' segurada nao muda velocidade nenhuma. O processador
+ * age no fluxo de eventos do listener, e por isso alcanca o cursor em pleno
+ * movimento, que e' o caso de uso do Ç.
+ *
+ * Nao afeta o scroll: &msc tem listener proprio. */
+&mmv_input_listener {
+    turbo {
+        layers = <4>;
+        input-processors = <&zip_xy_scaler 2 1>;
+    };
+};
+
 / {
         chosen {
                 zmk,battery = &vbatt;
@@ -114,27 +132,34 @@
                 mouse_layer {
 // -----------------------------------------------------------------------------------------
 // | UNLOK| NONE| NONE| NONE| NONE| NONE|   | SCRL| SCRL|  UP | SCRL| SCRL| NONE |
-// | SHFT | NONE| MID | RGHT| LEFT| NONE|   | DPI | LFT | DWN | RGT | TURB| PREV |
+// | SHFT | NONE| MID | RGHT| LEFT| NONE|   | LOCK| LFT | DWN | RGT | TURB| PREV |
 // | CTRL | NONE| NONE| NONE| NONE| NONE|   | NONE| NONE| NONE| RGB | BRD | BRI  |
 //                    | NONE| BASE| NONE|   | NONE| NONE| NONE|
+//
+// TURB (Ç) = &mo 4, turbo momentaneo. LOCK (H) = &tog 4, turbo travado.
                         bindings = <
    &studio_unlock &none &none    &none    &none    &none    &msc SCRL_LEFT  &msc SCRL_DOWN  &mmv MOVE_Y(-600) &msc SCRL_UP    &msc SCRL_RIGHT &none
-   &kp LSHFT      &none &mkp MCLK &mkp RCLK &mkp LCLK &none    &to 4           &mmv MOVE_X(-600) &mmv MOVE_Y(600) &mmv MOVE_X(600) &mo 4           &kp C_PREV
+   &kp LSHFT      &none &mkp MCLK &mkp RCLK &mkp LCLK &none    &tog 4          &mmv MOVE_X(-600) &mmv MOVE_Y(600) &mmv MOVE_X(600) &mo 4           &kp C_PREV
    &kp LCTRL      &none &none    &none    &none    &none    &none           &none           &none            &rgb_ug RGB_TOG &rgb_ug RGB_BRD &rgb_ug RGB_BRI
                                  &none    &to 0    &none    &none           &none           &none
                         >;
                 };
 
-                fast_mouse_layer {
+                turbo_layer {
 // -----------------------------------------------------------------------------------------
-// | UNLOK| NONE| NONE| NONE| NONE| NONE|   | SCRL| SCRL| UP2X| SCRL| SCRL| NONE |
-// | SHFT | NONE| MID | RGHT| LEFT| NONE|   | NORM|LFT2X|DWN2X|RGT2X| NONE| PREV |
+// Bindings identicos aos da camada 3 -- de proposito. A velocidade nao vem
+// daqui, vem do &zip_xy_scaler que o &mmv_input_listener aplica enquanto esta
+// camada estiver ativa. Duplicar as teclas em vez de usar &trans mantem a
+// camada auto-suficiente: se ela ficar ativa sozinha (turbo travado com o H e
+// os polegares soltos), nao ha' fallthrough para a camada 0 vazando letras.
+// | UNLOK| NONE| NONE| NONE| NONE| NONE|   | SCRL| SCRL|  UP | SCRL| SCRL| NONE |
+// | SHFT | NONE| MID | RGHT| LEFT| NONE|   | LOCK| LFT | DWN | RGT | NONE| PREV |
 // | CTRL | NONE| NONE| NONE| NONE| NONE|   | NONE| NONE| NONE| RGB | BRD | BRI  |
 //                    | NONE| BASE| NONE|   | NONE| NONE| NONE|
                         bindings = <
-   &studio_unlock &none &none    &none    &none    &none    &msc SCRL_LEFT  &msc SCRL_DOWN  &mmv MOVE_Y(-1800) &msc SCRL_UP    &msc SCRL_RIGHT &none
-   &kp LSHFT      &none &mkp MCLK &mkp RCLK &mkp LCLK &none    &to 3           &mmv MOVE_X(-1800) &mmv MOVE_Y(1800) &mmv MOVE_X(1800) &none          &kp C_PREV
-   &kp LCTRL      &none &none    &none    &none    &none    &none           &none           &none             &rgb_ug RGB_TOG &rgb_ug RGB_BRD &rgb_ug RGB_BRI
+   &studio_unlock &none &none    &none    &none    &none    &msc SCRL_LEFT  &msc SCRL_DOWN  &mmv MOVE_Y(-600) &msc SCRL_UP    &msc SCRL_RIGHT &none
+   &kp LSHFT      &none &mkp MCLK &mkp RCLK &mkp LCLK &none    &tog 4          &mmv MOVE_X(-600) &mmv MOVE_Y(600) &mmv MOVE_X(600) &none           &kp C_PREV
+   &kp LCTRL      &none &none    &none    &none    &none    &none           &none           &none            &rgb_ug RGB_TOG &rgb_ug RGB_BRD &rgb_ug RGB_BRI
                                  &none    &to 0    &none    &none           &none           &none
                         >;
                 };
