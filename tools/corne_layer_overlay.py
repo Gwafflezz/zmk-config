@@ -934,29 +934,37 @@ class OverlayWindow(Gtk.ApplicationWindow):
         self.painter.draw(cr, width, height, self.current_layer, name, labels)
 
     def on_layer(self, layer):
-        if self._hide_source is not None:
-            GLib.source_remove(self._hide_source)
-            self._hide_source = None
+        layer_changed = (self.current_layer != layer)
+        self.current_layer = layer
 
-        target_visible = self.always or layer != 0
-        if self.current_layer == layer and self.get_visible() == target_visible:
+        if self.always:
+            self.set_visible(True)
+            if layer_changed:
+                self.area.queue_draw()
             return False
 
-        self.current_layer = layer
-        if not self.always and layer == 0:
+        if layer == 0:
+            if self._hide_source is not None:
+                GLib.source_remove(self._hide_source)
+                self._hide_source = None
             self.set_visible(False)
             gc.collect()
             return False
 
-        self.set_visible(True)
-        self.area.queue_draw()
+        if layer_changed:
+            if self._hide_source is not None:
+                GLib.source_remove(self._hide_source)
+                self._hide_source = None
 
-        if not self.always:
+            self.set_visible(True)
+            self.area.queue_draw()
+
             def _hide():
                 self.set_visible(False)
                 self._hide_source = None
                 gc.collect()
                 return False
+
             self._hide_source = GLib.timeout_add(800, _hide)
 
         return False
