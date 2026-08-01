@@ -116,12 +116,12 @@
 // | UNLOK| NONE| NONE| NONE| NONE| NONE|   | SCRL| SCRL|  UP | SCRL| SCRL| NONE |
 // | SHFT | NONE| MID | RGHT| LEFT| NONE|   | DPI | LFT | DWN | RGT | TURB| PREV |
 // | CTRL | NONE| NONE| NONE| NONE| NONE|   | NONE| NONE| NONE| RGB | BRD | BRI  |
-//                    | NONE| NONE| NONE|   | NONE| NONE| NONE|
+//                    | NONE| BASE| NONE|   | NONE| NONE| NONE|
                         bindings = <
    &studio_unlock &none &none    &none    &none    &none    &msc SCRL_LEFT  &msc SCRL_DOWN  &mmv MOVE_Y(-600) &msc SCRL_UP    &msc SCRL_RIGHT &none
    &kp LSHFT      &none &mkp MCLK &mkp RCLK &mkp LCLK &none    &to 4           &mmv MOVE_X(-600) &mmv MOVE_Y(600) &mmv MOVE_X(600) &mo 4           &kp C_PREV
    &kp LCTRL      &none &none    &none    &none    &none    &none           &none           &none            &rgb_ug RGB_TOG &rgb_ug RGB_BRD &rgb_ug RGB_BRI
-                                 &none    &none    &none    &none           &none           &none
+                                 &none    &to 0    &none    &none           &none           &none
                         >;
                 };
 
@@ -130,26 +130,26 @@
 // | UNLOK| NONE| NONE| NONE| NONE| NONE|   | SCRL| SCRL| UP2X| SCRL| SCRL| NONE |
 // | SHFT | NONE| MID | RGHT| LEFT| NONE|   | DPI |LFT2X|DWN2X|RGT2X| TURB| PREV |
 // | CTRL | NONE| NONE| NONE| NONE| NONE|   | NONE| NONE| NONE| RGB | BRD | BRI  |
-//                    | NONE| NONE| NONE|   | NONE| NONE| NONE|
+//                    | NONE| BASE| NONE|   | NONE| NONE| NONE|
                         bindings = <
    &studio_unlock &none &none    &none    &none    &none    &msc SCRL_LEFT  &msc SCRL_DOWN  &mmv MOVE_Y(-1800) &msc SCRL_UP    &msc SCRL_RIGHT &none
    &kp LSHFT      &none &mkp MCLK &mkp RCLK &mkp LCLK &none    &to 5           &mmv MOVE_X(-1800) &mmv MOVE_Y(1800) &mmv MOVE_X(1800) &mo 5          &kp C_PREV
    &kp LCTRL      &none &none    &none    &none    &none    &none           &none           &none             &rgb_ug RGB_TOG &rgb_ug RGB_BRD &rgb_ug RGB_BRI
-                                 &none    &none    &none    &none           &none           &none
+                                 &none    &to 0    &none    &none           &none           &none
                         >;
                 };
 
                 ultra_mouse_layer {
 // -----------------------------------------------------------------------------------------
 // | UNLOK| NONE| NONE| NONE| NONE| NONE|   | SCRL| SCRL| UP3X| SCRL| SCRL| NONE |
-// | SHFT | NONE| MID | RGHT| LEFT| NONE|   | DPI |LFT3X|DWN3X|RGT3X| TURB| PREV |
+// | SHFT | NONE| MID | RGHT| LEFT| NONE|   | DPI |LFT3X|DWN3X|RGT3X| NONE| PREV |
 // | CTRL | NONE| NONE| NONE| NONE| NONE|   | NONE| NONE| NONE| RGB | BRD | BRI  |
-//                    | NONE| NONE| NONE|   | NONE| NONE| NONE|
+//                    | NONE| BASE| NONE|   | NONE| NONE| NONE|
                         bindings = <
    &studio_unlock &none &none    &none    &none    &none    &msc SCRL_LEFT  &msc SCRL_DOWN  &mmv MOVE_Y(-3000) &msc SCRL_UP    &msc SCRL_RIGHT &none
    &kp LSHFT      &none &mkp MCLK &mkp RCLK &mkp LCLK &none    &to 3           &mmv MOVE_X(-3000) &mmv MOVE_Y(3000) &mmv MOVE_X(3000) &none          &kp C_PREV
    &kp LCTRL      &none &none    &none    &none    &none    &none           &none           &none             &rgb_ug RGB_TOG &rgb_ug RGB_BRD &rgb_ug RGB_BRI
-                                 &none    &none    &none    &none           &none           &none
+                                 &none    &to 0    &none    &none           &none           &none
                         >;
                 };
         };
