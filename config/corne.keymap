@@ -17,7 +17,7 @@
 #include <input/processors.dtsi>
 
 &led_strip {
-    chain-length = <27>;
+    chain-length = <21>;
 };
 
 /* Resposta instantanea sem ramp-up / sem dampening */
@@ -26,21 +26,11 @@
     acceleration-exponent = <0>;
 };
 
-/* Turbo (camada 4): dobra o deslocamento do cursor enquanto a camada estiver
- * ativa.
- *
- * Precisa ser um input processor, nao bindings mais rapidos numa camada. O ZMK
- * resolve o binding de uma tecla uma unica vez, no press, e o &mmv fica preso
- * ao valor com que foi instanciado ate' o release -- entao trocar de camada com
- * uma tecla de movimento ja' segurada nao muda velocidade nenhuma. O processador
- * age no fluxo de eventos do listener, e por isso alcanca o cursor em pleno
- * movimento, que e' o caso de uso do Ç.
- *
- * Nao afeta o scroll: &msc tem listener proprio. */
+/* Turbo (camada 4): multiplica a velocidade do cursor por 2.5x (5/2) */
 &mmv_input_listener {
     turbo {
         layers = <4>;
-        input-processors = <&zip_xy_scaler 2 1>;
+        input-processors = <&zip_xy_scaler 5 2>;
     };
 };
 
@@ -108,18 +98,12 @@
         };
 
         behaviors {
-                // Tap-dance nas setas Cima e Baixo: 1 toque = movimento, 2 toques = scroll
-                td_scrl_up: td_scrl_up {
+                // Tap-dance na tecla A: 2 toques alternam o turbo de 2.5x velocidade
+                td_turbo: td_turbo {
                         compatible = "zmk,behavior-tap-dance";
                         #binding-cells = <0>;
-                        tapping-term-ms = <180>;
-                        bindings = <&mmv MOVE_Y(-600)>, <&msc SCRL_UP>;
-                };
-                td_scrl_down: td_scrl_down {
-                        compatible = "zmk,behavior-tap-dance";
-                        #binding-cells = <0>;
-                        tapping-term-ms = <180>;
-                        bindings = <&mmv MOVE_Y(600)>, <&msc SCRL_DOWN>;
+                        tapping-term-ms = <200>;
+                        bindings = <&none>, <&tog 4>;
                 };
         };
 
@@ -168,20 +152,21 @@
                         >;
                 };
 
-                mouse_layer {
+        mouse_layer {
                 // -----------------------------------------------------------------------------------------
-                // | UNLOK| NONE| NONE| NONE| NONE| NONE|   | SCRL| SCRL| TD_UP| SCRL| SCRL| NONE |
-                // | SHFT | TURB| MID | RGHT| LEFT| NONE|   | NONE| LFT | TD_DN| RGT | NONE| PREV |
-                // | CTRL | NONE| NONE| NONE| NONE| NONE|   | NONE| NONE| NONE | RGB | NONE| BRI  |
+                // | UNLOK| NONE| NONE| NONE| NONE| NONE|   | SCRL| SCRL|  UP | SCRL| SCRL| NONE |
+                // | SHFT | TURB| MID | RGHT| LEFT| NONE|   | NONE| LFT | DWN | RGT | NONE| PREV |
+                // | CTRL | NONE| NONE| NONE| NONE| NONE|   | NONE| NONE| NONE| RGB | NONE| BRI  |
                 //                    | NONE| BASE| NONE|   | NONE| BASE| NONE |
                 //
                 // Ativação: combo nos 2 polegares (LWR + RSE) trava a camada L3 (toggle ON).
                 // Desativação: pressionar qualquer um dos polegares (BASE) retorna para L0.
-                // Tecla A = turbo (2x velocidade).
-                // Setas Cima e Baixo: 1 toque = movimento Y, 2 toques = scroll Cima/Baixo.
+                // Tecla A = tap-dance (2 toques = turbo 2.5x velocidade).
+                // Teclas I/K/J/L = movimento 0ms (direto &mmv).
+                // Teclas U/O = scroll baixo/cima (&msc).
                                 bindings = <
-                &studio_unlock &none     &none    &none    &none    &none    &msc SCRL_LEFT  &msc SCRL_DOWN  &td_scrl_up       &msc SCRL_UP    &msc SCRL_RIGHT &none
-                &kp LSHFT      &turbo_mo &mkp MCLK &mkp RCLK &mkp LCLK &none    &none           &mmv MOVE_X(-600) &td_scrl_down     &mmv MOVE_X(600) &none           &kp C_PREV
+                &studio_unlock &none     &none    &none    &none    &none    &msc SCRL_LEFT  &msc SCRL_DOWN  &mmv MOVE_Y(-600) &msc SCRL_UP    &msc SCRL_RIGHT &none
+                &kp LSHFT      &td_turbo &mkp MCLK &mkp RCLK &mkp LCLK &none    &none           &mmv MOVE_X(-600) &mmv MOVE_Y(600)  &mmv MOVE_X(600) &none           &kp C_PREV
                 &kp LCTRL      &none     &none    &none    &none    &none    &none           &none           &none             &rgb_ug RGB_TOG &none           &rgb_ug RGB_BRI
                                              &none    &to 0    &none    &none           &to 0           &none
                                 >;
@@ -190,13 +175,13 @@
                 turbo_layer {
                 // -----------------------------------------------------------------------------------------
                 // Bindings identicos aos da camada 3.
-                // | UNLOK| NONE| NONE| NONE| NONE| NONE|   | SCRL| SCRL| TD_UP| SCRL| SCRL| NONE |
-                // | SHFT | TURB| MID | RGHT| LEFT| NONE|   | NONE| LFT | TD_DN| RGT | NONE| PREV |
-                // | CTRL | NONE| NONE| NONE| NONE| NONE|   | NONE| NONE| NONE | RGB | NONE| BRI  |
+                // | UNLOK| NONE| NONE| NONE| NONE| NONE|   | SCRL| SCRL|  UP | SCRL| SCRL| NONE |
+                // | SHFT | TURB| MID | RGHT| LEFT| NONE|   | NONE| LFT | DWN | RGT | NONE| PREV |
+                // | CTRL | NONE| NONE| NONE| NONE| NONE|   | NONE| NONE| NONE| RGB | NONE| BRI  |
                 //                    | NONE| BASE| NONE|   | NONE| BASE| NONE |
                                 bindings = <
-                &studio_unlock &none     &none    &none    &none    &none    &msc SCRL_LEFT  &msc SCRL_DOWN  &td_scrl_up       &msc SCRL_UP    &msc SCRL_RIGHT &none
-                &kp LSHFT      &turbo_mo &mkp MCLK &mkp RCLK &mkp LCLK &none    &none           &mmv MOVE_X(-600) &td_scrl_down     &mmv MOVE_X(600) &none           &kp C_PREV
+                &studio_unlock &none     &none    &none    &none    &none    &msc SCRL_LEFT  &msc SCRL_DOWN  &mmv MOVE_Y(-600) &msc SCRL_UP    &msc SCRL_RIGHT &none
+                &kp LSHFT      &td_turbo &mkp MCLK &mkp RCLK &mkp LCLK &none    &none           &mmv MOVE_X(-600) &mmv MOVE_Y(600)  &mmv MOVE_X(600) &none           &kp C_PREV
                 &kp LCTRL      &none     &none    &none    &none    &none    &none           &none           &none             &rgb_ug RGB_TOG &none           &rgb_ug RGB_BRI
                                              &none    &to 0    &none    &none           &to 0           &none
                                 >;
