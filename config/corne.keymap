@@ -52,14 +52,14 @@
         };
 
         behaviors {
-                // Tap-dance no polegar Lower (37):
-                // 1 toque/hold = Lower (L1)
+                // Tap-dance no polegar Raise (40):
+                // 1 toque/hold = Raise (L2)
                 // 2 toques e SEGURA = Navegação (L3) momentâneo (libera ao soltar o switch)
-                td_lwr_nav: td_lwr_nav {
+                td_rse_nav: td_rse_nav {
                         compatible = "zmk,behavior-tap-dance";
                         #binding-cells = <0>;
                         tapping-term-ms = <200>;
-                        bindings = <&lower_mo>, <&mo 3>;
+                        bindings = <&raise_mo>, <&mo 3>;
                 };
         };
 
@@ -112,7 +112,7 @@
    &kp TAB   &kp Q &kp W &kp E &kp R &kp T   &kp Y &kp U  &kp I     &kp O   &kp P    &kp BSPC
    &kp LCTRL &kp A &kp S &kp D &kp F &kp G   &kp H &kp J  &kp K     &kp L   &kp RA(C) &kp SQT
    &kp LSHFT &kp Z &kp X &kp C &kp V &kp B   &kp N &kp M  &kp COMMA &kp DOT &kp FSLH &kp ESC
-                  &kp LGUI &td_lwr_nav &kp RET   &kp SPACE &raise_mo &kp RALT
+                  &kp LGUI &lower_mo &kp RET     &kp SPACE &td_rse_nav &kp RALT
                         >;
                 };
 
