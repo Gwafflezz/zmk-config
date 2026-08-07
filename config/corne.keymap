@@ -62,12 +62,12 @@
 
         combos {
                 compatible = "zmk,combos";
-                // Pressionar ambos os polegares (37 + 40) na camada base (L0) trava L3
+                // Pressionar ambos os polegares (37 + 40) nas camadas 0, 1 ou 2 trava L3
                 combo_nav_layer {
                         timeout-ms = <50>;
                         key-positions = <37 40>;
                         bindings = <&tog 3>;
-                        layers = <0>;
+                        layers = <0 1 2>;
                 };
         };
 
