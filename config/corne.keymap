@@ -56,21 +56,18 @@
                 full-ohms = <2000000>;
         };
 
-        conditional_layers {
-                compatible = "zmk,conditional-layers";
-                tri_layer {
-                        if-layers = <1 2>;
-                        then-layer = <3>;
-                };
-        };
+        /* conditional_layers removido para permitir que o combo dos 2 polegares
+         * trava a camada de navegação (L3) sem que o desacionamento de L1/L2
+         * desative L3 automaticamente ao soltar os polegares. */
 
         combos {
                 compatible = "zmk,combos";
-                // Pressionar ambos os polegares (37 + 40) trava a camada de navegação (L3)
+                // Pressionar ambos os polegares (37 + 40) na camada base (L0) trava L3
                 combo_nav_layer {
                         timeout-ms = <50>;
                         key-positions = <37 40>;
                         bindings = <&tog 3>;
+                        layers = <0>;
                 };
         };
 
