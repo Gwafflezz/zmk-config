@@ -674,6 +674,7 @@ MOUSE_KEYS = {
     "MOVE_UP": "🖱↑", "MOVE_DOWN": "🖱↓", "MOVE_LEFT": "🖱←", "MOVE_RIGHT": "🖱→",
     "SCRL_UP": "⇕↑", "SCRL_DOWN": "⇕↓", "SCRL_LEFT": "⇕←", "SCRL_RIGHT": "⇕→",
     "mmv_td_up": "🖱↑", "mmv_td_down": "🖱↓", "mmv_td_left": "🖱←", "mmv_td_right": "🖱→",
+    "td_scrl_up": "🖱↑/⇕↑", "td_scrl_down": "🖱↓/⇕↓",
 }
 
 # &mmv carrega a velocidade no proprio argumento (MOVE_Y(-1800)), entao o rotulo
@@ -746,7 +747,7 @@ def binding_label(tokens):
         return MOUSE_KEYS.get(args[0], args[0])
     if beh == "&msc" and args:
         return MOUSE_KEYS.get(args[0], args[0])
-    if beh in ("&mmv_td_up", "&mmv_td_down", "&mmv_td_left", "&mmv_td_right", "mmv_td_up", "mmv_td_down", "mmv_td_left", "mmv_td_right"):
+    if beh in ("&mmv_td_up", "&mmv_td_down", "&mmv_td_left", "&mmv_td_right", "mmv_td_up", "mmv_td_down", "mmv_td_left", "mmv_td_right", "&td_scrl_up", "&td_scrl_down", "td_scrl_up", "td_scrl_down"):
         return MOUSE_KEYS.get(beh.lstrip("&"), beh)
     label = beh.lstrip("&")
     if args:

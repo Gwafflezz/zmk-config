@@ -64,6 +64,16 @@
                 };
         };
 
+        combos {
+                compatible = "zmk,combos";
+                // Pressionar ambos os polegares (37 + 40) trava a camada de navegação (L3)
+                combo_nav_layer {
+                        timeout-ms = <50>;
+                        key-positions = <37 40>;
+                        bindings = <&tog 3>;
+                };
+        };
+
         macros {
                 // Emite F13 ao entrar na lower (layer 1) e F14 ao sair.
                 // O overlay escuta esses sinais via evdev para funcionar por BT.
@@ -88,15 +98,8 @@
                                  ;
                 };
 
-                // Turbo momentaneo da tecla / (camadas de mouse), montado
+                // Turbo momentaneo da tecla A (camadas de mouse), montado
                 // com &tog em vez de &mo.
-                // Na bancada o &tog 4 sobe a camada 4 com o cursor em
-                // movimento, e o &mo 4 nao sobe. Entao o momentaneo e'
-                // construido a partir da primitiva que funciona: liga no
-                // press, espera o release, desliga. Mesma forma dos macros
-                // de polegar acima, que ja' se provaram neste teclado.
-                // Validado em bancada no H (firmware ccac273) antes de ser
-                // movido para o Ç.
                 turbo_mo: turbo_mo {
                         compatible = "zmk,behavior-macro";
                         #binding-cells = <0>;
@@ -104,6 +107,22 @@
                                  , <&macro_pause_for_release>
                                  , <&macro_tap &tog 4>
                                  ;
+                };
+        };
+
+        behaviors {
+                // Tap-dance nas setas Cima e Baixo: 1 toque = movimento, 2 toques = scroll
+                td_scrl_up: td_scrl_up {
+                        compatible = "zmk,behavior-tap-dance";
+                        #binding-cells = <0>;
+                        tapping-term-ms = <180>;
+                        bindings = <&mmv MOVE_Y(-600)>, <&msc SCRL_UP>;
+                };
+                td_scrl_down: td_scrl_down {
+                        compatible = "zmk,behavior-tap-dance";
+                        #binding-cells = <0>;
+                        tapping-term-ms = <180>;
+                        bindings = <&mmv MOVE_Y(600)>, <&msc SCRL_DOWN>;
                 };
         };
 
@@ -153,48 +172,37 @@
                 };
 
                 mouse_layer {
-// -----------------------------------------------------------------------------------------
-// | UNLOK| NONE| NONE| NONE| NONE| NONE|   | SCRL| SCRL|  UP | SCRL| SCRL| NONE |
-// | SHFT | NONE| MID | RGHT| LEFT| NONE|   | NONE| LFT | DWN | RGT | NONE| PREV |
-// | CTRL | NONE| NONE| NONE| NONE| NONE|   | NONE| NONE| NONE| RGB | TURB| BRI  |
-//                    | NONE| BASE| NONE|   | NONE| NONE| NONE|
-//
-// Comportamento: polegares pressionados = camada ativa. Cursor movendo +
-// segura / (TURB) = velocidade dobra (scaler na camada 4); solta / = volta
-// ao normal; solta polegar ou seta = movimento para. Nada mais.
-// O turbo saiu da posicao do Ç: la' toda alteracao compilada era ignorada
-// (sintoma: imprimia © = RA(C) da base), suspeita de override do ZMK Studio
-// gravado na EEPROM sobre aquele slot. A posicao do / obedece ao keymap.
-                        bindings = <
-   &studio_unlock &none &none    &none    &none    &none    &msc SCRL_LEFT  &msc SCRL_DOWN  &mmv MOVE_Y(-600) &msc SCRL_UP    &msc SCRL_RIGHT &none
-   &kp LSHFT      &none &mkp MCLK &mkp RCLK &mkp LCLK &none    &none           &mmv MOVE_X(-600) &mmv MOVE_Y(600) &mmv MOVE_X(600) &none           &kp C_PREV
-   &kp LCTRL      &none &none    &none    &none    &none    &none           &none           &none            &rgb_ug RGB_TOG &turbo_mo       &rgb_ug RGB_BRI
-                                 &none    &to 0    &none    &none           &none           &none
-                        >;
+                // -----------------------------------------------------------------------------------------
+                // | UNLOK| NONE| NONE| NONE| NONE| NONE|   | SCRL| SCRL| TD_UP| SCRL| SCRL| NONE |
+                // | SHFT | TURB| MID | RGHT| LEFT| NONE|   | NONE| LFT | TD_DN| RGT | NONE| PREV |
+                // | CTRL | NONE| NONE| NONE| NONE| NONE|   | NONE| NONE| NONE | RGB | NONE| BRI  |
+                //                    | NONE| BASE| NONE|   | NONE| BASE| NONE |
+                //
+                // Ativação: combo nos 2 polegares (LWR + RSE) trava a camada L3 (toggle ON).
+                // Desativação: pressionar qualquer um dos polegares (BASE) retorna para L0.
+                // Tecla A = turbo (2x velocidade).
+                // Setas Cima e Baixo: 1 toque = movimento Y, 2 toques = scroll Cima/Baixo.
+                                bindings = <
+                &studio_unlock &none     &none    &none    &none    &none    &msc SCRL_LEFT  &msc SCRL_DOWN  &td_scrl_up       &msc SCRL_UP    &msc SCRL_RIGHT &none
+                &kp LSHFT      &turbo_mo &mkp MCLK &mkp RCLK &mkp LCLK &none    &none           &mmv MOVE_X(-600) &td_scrl_down     &mmv MOVE_X(600) &none           &kp C_PREV
+                &kp LCTRL      &none     &none    &none    &none    &none    &none           &none           &none             &rgb_ug RGB_TOG &none           &rgb_ug RGB_BRI
+                                             &none    &to 0    &none    &none           &to 0           &none
+                                >;
                 };
 
                 turbo_layer {
-// -----------------------------------------------------------------------------------------
-// Bindings identicos aos da camada 3 -- de proposito. A velocidade nao vem
-// daqui, vem do &zip_xy_scaler que o &mmv_input_listener aplica enquanto esta
-// camada estiver ativa. Duplicar as teclas em vez de usar &trans mantem a
-// camada auto-suficiente: se ela ficar ativa sozinha (residuo de toggle
-// dessincronizado), nao ha' fallthrough para a camada 0 vazando letras -- e o
-// polegar BASE (&to 0) continua sendo a saida garantida.
-// | UNLOK| NONE| NONE| NONE| NONE| NONE|   | SCRL| SCRL|  UP | SCRL| SCRL| NONE |
-// | SHFT | NONE| MID | RGHT| LEFT| NONE|   | NONE| LFT | DWN | RGT | NONE| PREV |
-// | CTRL | NONE| NONE| NONE| NONE| NONE|   | NONE| NONE| NONE| RGB | TURB| BRI  |
-//                    | NONE| BASE| NONE|   | NONE| NONE| NONE|
-//
-// O / aqui tambem e' &turbo_mo (espelhando a camada 3): qualquer press com a
-// camada 4 ja' ativa mantem os taps de &tog pareados por instancia em vez de
-// dessincronizar.
-                        bindings = <
-   &studio_unlock &none &none    &none    &none    &none    &msc SCRL_LEFT  &msc SCRL_DOWN  &mmv MOVE_Y(-600) &msc SCRL_UP    &msc SCRL_RIGHT &none
-   &kp LSHFT      &none &mkp MCLK &mkp RCLK &mkp LCLK &none    &none           &mmv MOVE_X(-600) &mmv MOVE_Y(600) &mmv MOVE_X(600) &none           &kp C_PREV
-   &kp LCTRL      &none &none    &none    &none    &none    &none           &none           &none            &rgb_ug RGB_TOG &turbo_mo       &rgb_ug RGB_BRI
-                                 &none    &to 0    &none    &none           &none           &none
-                        >;
+                // -----------------------------------------------------------------------------------------
+                // Bindings identicos aos da camada 3.
+                // | UNLOK| NONE| NONE| NONE| NONE| NONE|   | SCRL| SCRL| TD_UP| SCRL| SCRL| NONE |
+                // | SHFT | TURB| MID | RGHT| LEFT| NONE|   | NONE| LFT | TD_DN| RGT | NONE| PREV |
+                // | CTRL | NONE| NONE| NONE| NONE| NONE|   | NONE| NONE| NONE | RGB | NONE| BRI  |
+                //                    | NONE| BASE| NONE|   | NONE| BASE| NONE |
+                                bindings = <
+                &studio_unlock &none     &none    &none    &none    &none    &msc SCRL_LEFT  &msc SCRL_DOWN  &td_scrl_up       &msc SCRL_UP    &msc SCRL_RIGHT &none
+                &kp LSHFT      &turbo_mo &mkp MCLK &mkp RCLK &mkp LCLK &none    &none           &mmv MOVE_X(-600) &td_scrl_down     &mmv MOVE_X(600) &none           &kp C_PREV
+                &kp LCTRL      &none     &none    &none    &none    &none    &none           &none           &none             &rgb_ug RGB_TOG &none           &rgb_ug RGB_BRI
+                                             &none    &to 0    &none    &none           &to 0           &none
+                                >;
                 };
         };
 };
