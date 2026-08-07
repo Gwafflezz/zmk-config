@@ -58,7 +58,7 @@
                 td_lwr_nav: td_lwr_nav {
                         compatible = "zmk,behavior-tap-dance";
                         #binding-cells = <0>;
-                        tapping-term-ms = <200>;
+                        tapping-term-ms = <150>;
                         bindings = <&lower_mo>, <&mo 3>;
                 };
         };
