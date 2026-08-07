@@ -51,18 +51,15 @@
                 full-ohms = <2000000>;
         };
 
-        /* conditional_layers removido para permitir que o combo dos 2 polegares
-         * trava a camada de navegação (L3) sem que o desacionamento de L1/L2
-         * desative L3 automaticamente ao soltar os polegares. */
-
-        combos {
-                compatible = "zmk,combos";
-                // Pressionar ambos os polegares (37 + 40) nas camadas 0, 1 ou 2 trava L3
-                combo_nav_layer {
-                        timeout-ms = <50>;
-                        key-positions = <37 40>;
-                        bindings = <&tog 3>;
-                        layers = <0 1 2>;
+        behaviors {
+                // Tap-dance no polegar Lower (37):
+                // 1 toque/hold = Lower (L1)
+                // 2 toques e SEGURA = Navegação (L3) momentâneo (libera ao soltar o switch)
+                td_lwr_nav: td_lwr_nav {
+                        compatible = "zmk,behavior-tap-dance";
+                        #binding-cells = <0>;
+                        tapping-term-ms = <200>;
+                        bindings = <&lower_mo>, <&mo 3>;
                 };
         };
 
@@ -115,7 +112,7 @@
    &kp TAB   &kp Q &kp W &kp E &kp R &kp T   &kp Y &kp U  &kp I     &kp O   &kp P    &kp BSPC
    &kp LCTRL &kp A &kp S &kp D &kp F &kp G   &kp H &kp J  &kp K     &kp L   &kp RA(C) &kp SQT
    &kp LSHFT &kp Z &kp X &kp C &kp V &kp B   &kp N &kp M  &kp COMMA &kp DOT &kp FSLH &kp ESC
-                  &kp LGUI &lower_mo &kp RET     &kp SPACE &raise_mo &kp RALT
+                  &kp LGUI &td_lwr_nav &kp RET   &kp SPACE &raise_mo &kp RALT
                         >;
                 };
 
@@ -152,10 +149,10 @@
                 // | UNLOK| NONE| NONE| NONE| NONE| NONE|   | SCRL| SCRL|  UP | SCRL| SCRL| NONE |
                 // | SHFT | TURB| MID | RGHT| LEFT| NONE|   | NONE| LFT | DWN | RGT | NONE| PREV |
                 // | CTRL | NONE| NONE| NONE| NONE| NONE|   | NONE| NONE| NONE| RGB | NONE| BRI  |
-                //                    | GUI | BASE| ENT |   | SPC | BASE| ALT  |
+                //                    | GUI | NONE| ENT |   | SPC | NONE| ALT  |
                 //
-                // Ativação: combo nos 2 polegares (LWR + RSE) trava a camada L3 (toggle ON).
-                // Desativação: pressionar qualquer um dos polegares do meio (BASE) retorna para L0.
+                // Ativação Lower: 1 toque/hold no polegar Lower = L1.
+                // Ativação Navegação: 2 toques e SEGURA no polegar Lower = L3 (momentâneo, libera ao soltar).
                 // Tecla A = turbo 2.5x (segurar).
                 // Teclas I/K/J/L = movimento 0ms (direto &mmv).
                 // Teclas U/O = scroll 0ms curto (direto &msc).
@@ -164,7 +161,7 @@
                 &studio_unlock &none     &none    &none    &none    &none    &msc SCRL_LEFT  &msc SCRL_DOWN  &mmv MOVE_Y(-600) &msc SCRL_UP    &msc SCRL_RIGHT &none
                 &kp LSHFT      &turbo_mo &mkp MCLK &mkp RCLK &mkp LCLK &none    &none           &mmv MOVE_X(-600) &mmv MOVE_Y(600)  &mmv MOVE_X(600) &none           &kp C_PREV
                 &kp LCTRL      &none     &none    &none    &none    &none    &none           &none           &none             &rgb_ug RGB_TOG &none           &rgb_ug RGB_BRI
-                                             &kp LGUI &to 0    &kp RET  &kp SPACE       &to 0           &kp RALT
+                                             &kp LGUI &none    &kp RET  &kp SPACE       &none           &kp RALT
                                 >;
                 };
 
@@ -174,12 +171,12 @@
                 // | UNLOK| NONE| NONE| NONE| NONE| NONE|   | SCRL| SCRL|  UP | SCRL| SCRL| NONE |
                 // | SHFT | TURB| MID | RGHT| LEFT| NONE|   | NONE| LFT | DWN | RGT | NONE| PREV |
                 // | CTRL | NONE| NONE| NONE| NONE| NONE|   | NONE| NONE| NONE| RGB | NONE| BRI  |
-                //                    | GUI | BASE| ENT |   | SPC | BASE| ALT  |
+                //                    | GUI | NONE| ENT |   | SPC | NONE| ALT  |
                                 bindings = <
                 &studio_unlock &none     &none    &none    &none    &none    &msc SCRL_LEFT  &msc SCRL_DOWN  &mmv MOVE_Y(-600) &msc SCRL_UP    &msc SCRL_RIGHT &none
                 &kp LSHFT      &turbo_mo &mkp MCLK &mkp RCLK &mkp LCLK &none    &none           &mmv MOVE_X(-600) &mmv MOVE_Y(600)  &mmv MOVE_X(600) &none           &kp C_PREV
                 &kp LCTRL      &none     &none    &none    &none    &none    &none           &none           &none             &rgb_ug RGB_TOG &none           &rgb_ug RGB_BRI
-                                             &kp LGUI &to 0    &kp RET  &kp SPACE       &to 0           &kp RALT
+                                             &kp LGUI &none    &kp RET  &kp SPACE       &none           &kp RALT
                                 >;
                 };
         };
