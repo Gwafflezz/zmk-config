@@ -918,6 +918,7 @@ class OverlayWindow(Gtk.ApplicationWindow):
         self.always = always
         self.current_layer = 0
         self._hide_source = None
+        self._dodged = False
 
         self.painter = CornePainter(scale)
         self.set_title("Corne Layer Overlay")
@@ -930,6 +931,11 @@ class OverlayWindow(Gtk.ApplicationWindow):
         self.area.set_content_height(int(self.painter.height))
         self.area.set_draw_func(self._on_draw)
         self.set_child(self.area)
+
+        # Controlador de movimento do mouse para desviar do cursor
+        motion_ctrl = Gtk.EventControllerMotion.new()
+        motion_ctrl.connect("enter", self._on_mouse_enter)
+        self.add_controller(motion_ctrl)
 
         self.add_css_class("transparent")
         css = Gtk.CssProvider()
@@ -951,6 +957,31 @@ class OverlayWindow(Gtk.ApplicationWindow):
         LayerShell.set_keyboard_mode(self, LayerShell.KeyboardMode.NONE)
         LayerShell.set_namespace(self, "corne-layer-overlay")
 
+    def _on_mouse_enter(self, controller, x, y):
+        self._toggle_dodge()
+
+    def _toggle_dodge(self):
+        if not HAVE_LAYER_SHELL:
+            return
+        self._dodged = not self._dodged
+        if self._dodged:
+            # Desvia para o canto superior esquerdo (TOP-LEFT)
+            LayerShell.set_anchor(self, LayerShell.Edge.RIGHT, False)
+            LayerShell.set_anchor(self, LayerShell.Edge.LEFT, True)
+            LayerShell.set_margin(self, LayerShell.Edge.LEFT, 12)
+        else:
+            # Retorna para o canto superior direito (TOP-RIGHT)
+            LayerShell.set_anchor(self, LayerShell.Edge.LEFT, False)
+            LayerShell.set_anchor(self, LayerShell.Edge.RIGHT, True)
+            LayerShell.set_margin(self, LayerShell.Edge.RIGHT, 12)
+
+    def _reset_dodge(self):
+        if self._dodged and HAVE_LAYER_SHELL:
+            self._dodged = False
+            LayerShell.set_anchor(self, LayerShell.Edge.LEFT, False)
+            LayerShell.set_anchor(self, LayerShell.Edge.RIGHT, True)
+            LayerShell.set_margin(self, LayerShell.Edge.RIGHT, 12)
+
     def _on_draw(self, area, cr, width, height):
         name, labels = self.layers[self.current_layer] if \
             self.current_layer < len(self.layers) else ("?", [])
@@ -971,6 +1002,7 @@ class OverlayWindow(Gtk.ApplicationWindow):
                 GLib.source_remove(self._hide_source)
                 self._hide_source = None
             self.set_visible(False)
+            self._reset_dodge()
             gc.collect()
             return False
 
@@ -984,6 +1016,7 @@ class OverlayWindow(Gtk.ApplicationWindow):
 
             def _hide():
                 self.set_visible(False)
+                self._reset_dodge()
                 self._hide_source = None
                 gc.collect()
                 return False
