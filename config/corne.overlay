@@ -11,8 +11,6 @@
     io-channels = <&adc 6>;
     output-ohms = <100000>;
     full-ohms = <200000>;
-    min-microvolts = <3300000>;
-    max-microvolts = <4200000>;
 };
 
 &led_strip {
