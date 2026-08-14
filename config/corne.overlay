@@ -6,11 +6,12 @@
 
 #include <dt-bindings/zmk/matrix_transform.h>
 
-/* Extension for the existing vbatt node in nice_nano_v2 */
+/* Extension for SuperMini nRF52840 battery voltage divider */
 &vbatt {
-    io-channels = <&adc 6>;
-    output-ohms = <100000>;
-    full-ohms = <200000>;
+    /delete-property/ power-gpios;
+    io-channels = <&adc 2>;
+    output-ohms = <1000000>;
+    full-ohms = <2000000>;
 };
 
 &led_strip {

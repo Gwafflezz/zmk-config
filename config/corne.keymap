@@ -40,17 +40,6 @@
 };
 
 / {
-        chosen {
-                zmk,battery = &vbatt;
-        };
-
-        vbatt: vbatt {
-                compatible = "zmk,battery-voltage-divider";
-                io-channels = <&adc 2>;
-                output-ohms = <1000000>;
-                full-ohms = <2000000>;
-        };
-
         behaviors {
                 // Tap-dance no polegar Raise (40):
                 // 1 toque/hold = Raise (L2)
