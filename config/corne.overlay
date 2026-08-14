@@ -6,14 +6,28 @@
 
 #include <dt-bindings/zmk/matrix_transform.h>
 
-/* Extension for SuperMini nRF52840 battery voltage divider */
-&vbatt {
-    /delete-property/ power-gpios;
-    io-channels = <&adc 2>;
-    output-ohms = <1000000>;
-    full-ohms = <2000000>;
-};
+/*
+ * Bateria: o no vbatt do nice_nano_v2 e' "zmk,battery-nrf-vddh" e o driver le SEMPRE o
+ * canal VDDHDIV5 -- io-channels/output-ohms/full-ohms sao ignorados nesse compatible,
+ * por isso as tentativas anteriores de divisor aqui nao surtiram efeito nenhum.
+ * Enquanto o diagnostico (mV reais via log USB) nao definir a rota de hardware,
+ * mantemos o sensing VDDH stock, sem overrides.
+ *
+ * Se for para divisor externo, o jeito certo e' sobrescrever o compatible do proprio
+ * no (nunca criar um segundo no vbatt):
+ *   &vbatt {
+ *       compatible = "zmk,battery-voltage-divider";
+ *       io-channels = <&adc 2>;   // ajustar ao pino AIN realmente usado
+ *       output-ohms = <1000000>;
+ *       full-ohms = <2000000>;
+ *   };
+ */
 
+/*
+ * 21 = so os LEDs per-key, se eles vierem primeiro na cadeia desta PCB. O driver pinta
+ * todos os pixels com a mesma cor e chain-length so trunca a partir do inicio da cadeia;
+ * se acenderem os 6 de underglow + 15 per-key, a ordem e' a inversa e o valor volta a 27.
+ */
 &led_strip {
-    chain-length = <27>;
+    chain-length = <21>;
 };

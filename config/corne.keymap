@@ -138,6 +138,8 @@
                 // | UNLOK| NONE| NONE| NONE| NONE| NONE|   | SCRL| SCRL|  UP | SCRL| SCRL| NONE |
                 // | SHFT | TURB| MID | RGHT| LEFT| NONE|   | NONE| LFT | DWN | RGT | NONE| PREV |
                 // | CTRL | NONE| NONE| NONE| NONE| NONE|   | NONE| NONE| NONE| RGB | NONE| BRI  |
+                // Sem teclas &ext_power: CONFIG_ZMK_EXT_POWER=n (o controle de P0.13 do
+                // nice_nano_v2 desliga o VCC neste clone SuperMini).
                 //                    | GUI | NONE| ENT |   | SPC | NONE| ALT  |
                 //
                 // Ativação Lower: 1 toque/hold no polegar Lower = L1.
@@ -160,6 +162,8 @@
                 // | UNLOK| NONE| NONE| NONE| NONE| NONE|   | SCRL| SCRL|  UP | SCRL| SCRL| NONE |
                 // | SHFT | TURB| MID | RGHT| LEFT| NONE|   | NONE| LFT | DWN | RGT | NONE| PREV |
                 // | CTRL | NONE| NONE| NONE| NONE| NONE|   | NONE| NONE| NONE| RGB | NONE| BRI  |
+                // Sem teclas &ext_power: CONFIG_ZMK_EXT_POWER=n (o controle de P0.13 do
+                // nice_nano_v2 desliga o VCC neste clone SuperMini).
                 //                    | GUI | NONE| ENT |   | SPC | NONE| ALT  |
                                 bindings = <
                 &studio_unlock &none     &none    &none    &none    &none    &msc SCRL_LEFT  &msc SCRL_DOWN  &mmv MOVE_Y(-600) &msc SCRL_UP    &msc SCRL_RIGHT &none
