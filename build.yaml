@@ -33,7 +33,7 @@ include:
   # battery_nrf_vddh: "ADC raw %d ~ %d mV => %d%%". Remover esta entrada depois.
   - board: nice_nano_v2
     shield: corne_left raw_hid_adapter
-    cmake-args: -DCONFIG_ZMK_USB_LOGGING=y
+    snippet: zmk-usb-logging
     artifact-name: corne_left_debug
   # Escotilha de emergencia: apaga o NVS da metade em que for flashado (inclusive o
   # estado "ext power off" que deixa o OLED apagado) -- derruba tambem os pareamentos
