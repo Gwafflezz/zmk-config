@@ -5,6 +5,17 @@
  */
 
 #include <dt-bindings/zmk/matrix_transform.h>
+#include <zephyr/dt-bindings/gpio/gpio.h>
+
+/*
+ * Ext power: o no EXT_POWER do nice_nano_v2 (sem label, por isso o caminho absoluto)
+ * declara P0.13 como GPIO_ACTIVE_HIGH. Neste clone SuperMini o VCC cai quando o ZMK
+ * "habilita" o pino, o que aponta para acionamento invertido do MOSFET -- daqui o
+ * GPIO_ACTIVE_LOW. Se o OLED apagar logo apos o boot, este override e' que esta errado.
+ */
+&{/EXT_POWER} {
+    control-gpios = <&gpio0 13 GPIO_ACTIVE_LOW>;
+};
 
 /*
  * Bateria: o no vbatt do nice_nano_v2 e' "zmk,battery-nrf-vddh" e o driver le SEMPRE o

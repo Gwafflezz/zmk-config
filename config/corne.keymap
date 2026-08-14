@@ -137,9 +137,9 @@
                 // -----------------------------------------------------------------------------------------
                 // | UNLOK| NONE| NONE| NONE| NONE| NONE|   | SCRL| SCRL|  UP | SCRL| SCRL| NONE |
                 // | SHFT | TURB| MID | RGHT| LEFT| NONE|   | NONE| LFT | DWN | RGT | NONE| PREV |
-                // | CTRL | NONE| NONE| NONE| NONE| NONE|   | NONE| NONE| NONE| RGB | NONE| BRI  |
-                // Sem teclas &ext_power: CONFIG_ZMK_EXT_POWER=n (o controle de P0.13 do
-                // nice_nano_v2 desliga o VCC neste clone SuperMini).
+                // | CTRL | NONE| NONE| NONE| NONE| EPON|   | NONE| NONE| NONE| RGB | EPON| BRI  |
+                // EPON = &ext_power EP_ON (so' liga, nunca desliga). O estado do ext power
+                // e' salvo por metade, por isso ha uma tecla de cada lado.
                 //                    | GUI | NONE| ENT |   | SPC | NONE| ALT  |
                 //
                 // Ativação Lower: 1 toque/hold no polegar Lower = L1.
@@ -151,7 +151,7 @@
                                 bindings = <
                 &studio_unlock &none     &none    &none    &none    &none    &msc SCRL_LEFT  &msc SCRL_DOWN  &mmv MOVE_Y(-600) &msc SCRL_UP    &msc SCRL_RIGHT &none
                 &kp LSHFT      &turbo_mo &mkp MCLK &mkp RCLK &mkp LCLK &none    &none           &mmv MOVE_X(-600) &mmv MOVE_Y(600)  &mmv MOVE_X(600) &none           &kp C_PREV
-                &kp LCTRL      &none     &none    &none    &none    &none    &none           &none           &none             &rgb_ug RGB_TOG &none           &rgb_ug RGB_BRI
+                &kp LCTRL      &none     &none    &none    &none    &ext_power EP_ON &none           &none           &none             &rgb_ug RGB_TOG &ext_power EP_ON &rgb_ug RGB_BRI
                                              &kp LGUI &none    &kp RET  &kp SPACE       &none           &kp RALT
                                 >;
                 };
@@ -161,14 +161,14 @@
                 // Bindings identicos aos da camada 3.
                 // | UNLOK| NONE| NONE| NONE| NONE| NONE|   | SCRL| SCRL|  UP | SCRL| SCRL| NONE |
                 // | SHFT | TURB| MID | RGHT| LEFT| NONE|   | NONE| LFT | DWN | RGT | NONE| PREV |
-                // | CTRL | NONE| NONE| NONE| NONE| NONE|   | NONE| NONE| NONE| RGB | NONE| BRI  |
-                // Sem teclas &ext_power: CONFIG_ZMK_EXT_POWER=n (o controle de P0.13 do
-                // nice_nano_v2 desliga o VCC neste clone SuperMini).
+                // | CTRL | NONE| NONE| NONE| NONE| EPON|   | NONE| NONE| NONE| RGB | EPON| BRI  |
+                // EPON = &ext_power EP_ON (so' liga, nunca desliga). O estado do ext power
+                // e' salvo por metade, por isso ha uma tecla de cada lado.
                 //                    | GUI | NONE| ENT |   | SPC | NONE| ALT  |
                                 bindings = <
                 &studio_unlock &none     &none    &none    &none    &none    &msc SCRL_LEFT  &msc SCRL_DOWN  &mmv MOVE_Y(-600) &msc SCRL_UP    &msc SCRL_RIGHT &none
                 &kp LSHFT      &turbo_mo &mkp MCLK &mkp RCLK &mkp LCLK &none    &none           &mmv MOVE_X(-600) &mmv MOVE_Y(600)  &mmv MOVE_X(600) &none           &kp C_PREV
-                &kp LCTRL      &none     &none    &none    &none    &none    &none           &none           &none             &rgb_ug RGB_TOG &none           &rgb_ug RGB_BRI
+                &kp LCTRL      &none     &none    &none    &none    &ext_power EP_ON &none           &none           &none             &rgb_ug RGB_TOG &ext_power EP_ON &rgb_ug RGB_BRI
                                              &kp LGUI &none    &kp RET  &kp SPACE       &none           &kp RALT
                                 >;
                 };
