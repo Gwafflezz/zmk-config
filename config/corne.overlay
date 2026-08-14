@@ -6,20 +6,13 @@
 
 #include <dt-bindings/zmk/matrix_transform.h>
 
-/ {
-    chosen {
-        zmk,battery = &vbatt;
-    };
-
-    vbatt: vbatt {
-        compatible = "zmk,battery-voltage-divider";
-        label = "BATTERY";
-        io-channels = <&adc 6>;
-        output-ohms = <100000>;
-        full-ohms = <200000>;
-        min-microvolts = <3300000>;
-        max-microvolts = <4200000>;
-    };
+/* Extension for the existing vbatt node in nice_nano_v2 */
+&vbatt {
+    io-channels = <&adc 6>;
+    output-ohms = <100000>;
+    full-ohms = <200000>;
+    min-microvolts = <3300000>;
+    max-microvolts = <4200000>;
 };
 
 &led_strip {
