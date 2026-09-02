@@ -4,3 +4,4 @@
 # Bytecode do overlay em tools/
 __pycache__/
 *.pyc
+backup-nvs-aparelho-*/
