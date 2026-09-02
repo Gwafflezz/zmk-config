@@ -471,8 +471,10 @@ class StudioReader(threading.Thread):
         14:'K',15:'L',16:'M',17:'N',18:'O',19:'P',20:'Q',21:'R',22:'S',
         23:'T',24:'U',25:'V',26:'W',27:'X',28:'Y',29:'Z',
         30:'1',31:'2',32:'3',33:'4',34:'5',35:'6',36:'7',37:'8',38:'9',39:'0',
-        40:'⏎',41:'⎋',42:'⌫',43:'⇥',44:'␣',45:'-',46:'=',47:'[',48:']',
-        49:'\\',51:';',52:"'",53:'`',54:',',55:'.',56:'/', 70:'BT⌫', 84:'/',
+        # Simbolos conforme o xkb "br" (ABNT2) do host, nao o layout US do HID.
+        40:'⏎',41:'⎋',42:'⌫',43:'⇥',44:'␣',45:'-',46:'=',47:'´`',48:'[',
+        49:']',51:'Ç',52:'~^',53:"'",54:',',55:'.',56:';', 84:'/',
+        100:'\\', 135:'/',
         58:'F1',59:'F2',60:'F3',61:'F4',62:'F5',63:'F6',
         64:'F7',65:'F8',66:'F9',67:'F10',68:'F11',69:'F12',
         70:'PrSc', 74:'Home',75:'PgUp',76:'⌦',77:'End',78:'PgDn',
@@ -488,11 +490,23 @@ class StudioReader(threading.Thread):
         0xB5:'Next', 0xB6:'Prev', 0xCD:'Play', 0xE2:'Mute', 0xE9:'Vol+', 0xEA:'Vol-'
     }
 
+    # Shift implicito (LS/RS nos bits 24-31 do param) muda o simbolo no br.
+    _KB_SHIFTED = {
+        45:'_',46:'+',47:'`',48:'{',49:'}',51:'Ç',52:'^',53:'"',
+        54:'<',55:'>',56:':',100:'|',135:'?',
+        30:'!',31:'@',32:'#',33:'$',34:'%',35:'¨',36:'&',37:'*',38:'(',39:')',
+    }
+
     def _hid_label(self, param):
         page  = (param >> 16) & 0xFF
         usage = param & 0xFFFF
+        mods  = (param >> 24) & 0xFF
         if page == 0: page = 7
-        if page == 7:  return self._KB.get(usage, f'?{usage:X}')
+        if page == 7:
+            if mods & 0x22:  # LSFT ou RSFT implicitos
+                shifted = self._KB_SHIFTED.get(usage)
+                if shifted: return shifted
+            return self._KB.get(usage, f'?{usage:X}')
         if page == 0xC: return self._CS.get(usage, f'C{usage:X}')
         return f'{param:X}'
 
@@ -646,13 +660,16 @@ KEY_LABELS = {
     "DEL": "⌦", "CAPS": "⇪", "ENTER": "⏎",
     "LCTRL": "Ctrl", "RCTRL": "Ctrl", "LSHFT": "⇧", "RSHFT": "⇧",
     "LGUI": "Gui", "RGUI": "Gui", "LALT": "Alt", "RALT": "Alt",
-    "SQT": "'", "DQT": '"', "COMMA": ",", "DOT": ".", "FSLH": "/",
-    "BSLH": "\\", "SEMI": ";", "COLON": ":", "GRAVE": "`", "TILDE": "~",
+    # Legendas conforme o xkb "br" (ABNT2) do host, nao o layout US dos nomes ZMK.
+    "SQT": "~^", "DQT": "^", "COMMA": ",", "DOT": ".", "FSLH": ";",
+    "BSLH": "]", "SEMI": "Ç", "COLON": "Ç", "GRAVE": "'", "TILDE": '"',
     "MINUS": "-", "EQUAL": "=", "UNDER": "_", "PLUS": "+",
-    "LBKT": "[", "RBKT": "]", "LBRC": "{", "RBRC": "}",
-    "LPAR": "(", "RPAR": ")", "PIPE": "|",
+    "LBKT": "´`", "RBKT": "[", "LBRC": "`", "RBRC": "{",
+    "LPAR": "(", "RPAR": ")", "PIPE": "}",
     "EXCL": "!", "AT": "@", "HASH": "#", "DLLR": "$", "PRCNT": "%",
-    "CARET": "^", "AMPS": "&", "ASTRK": "*", "QMARK": "?",
+    "CARET": "¨", "AMPS": "&", "ASTRK": "*", "QMARK": ":",
+    "INT1": "/", "INTERNATIONAL_1": "/",
+    "NON_US_BACKSLASH": "\\", "NON_US_BSLH": "\\",
     "LEFT": "←", "RIGHT": "→", "UP": "↑", "DOWN": "↓",
     "HOME": "Home", "END": "End", "PG_UP": "PgUp", "PG_DN": "PgDn",
     "C_VOL_UP": "Vol+", "C_VOL_DN": "Vol-", "C_MUTE": "Mute",
@@ -689,12 +706,24 @@ _MOVE_ARROWS = {
 _MOVE_TIERS = {600: "", 1500: " 2.5x", 1800: " 2.5x", 2000: " 2.5x", 3000: " 3x"}
 
 
+# O que cada keycode produz com shift no xkb "br"; usado pelos bindings LS(...)
+# explicitos da raise. Sem entrada aqui, o rotulo cai no da tecla sem shift.
+BR_SHIFTED = {
+    "MINUS": "_", "EQUAL": "+", "RBKT": "{", "BSLH": "}",
+    "NON_US_BACKSLASH": "|", "NON_US_BSLH": "|", "GRAVE": '"',
+    "INT1": "?", "INTERNATIONAL_1": "?", "FSLH": ":", "SEMI": "Ç",
+    "SQT": "^", "LBKT": "`", "COMMA": "<", "DOT": ">",
+    "N1": "!", "N2": "@", "N3": "#", "N4": "$", "N5": "%",
+    "N6": "¨", "N7": "&", "N8": "*", "N9": "(", "N0": ")",
+}
+
+
 def _kp_label(code):
-    m = re.fullmatch(r"[LR][ACGS]\((.+)\)", code)
+    m = re.fullmatch(r"([LR][ACGS])\((.+)\)", code)
     if m:
-        inner = m.group(1)
-        if code == "RA(C)":
-            return "Ç"
+        mod, inner = m.group(1), m.group(2)
+        if mod in ("LS", "RS") and inner in BR_SHIFTED:
+            return BR_SHIFTED[inner]
         return _kp_label(inner)
     return KEY_LABELS.get(code, code)
 
