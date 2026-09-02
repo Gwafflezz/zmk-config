@@ -28,9 +28,14 @@
  * zerava os dois, dai' o cursor sair em velocidade cheia no primeiro tick.
  *
  * Ajuste fino: subir time-to-max-speed-ms alonga a rampa; expoente 2 (quadratico)
- * deixa o inicio ainda mais lento, pra alvo bem pequeno. 300/1 e' o default do ZMK. */
+ * deixa o inicio ainda mais lento, pra alvo bem pequeno. 300/1 e' o default do ZMK.
+ *
+ * 2026-09-02: rampa encurtada de 300ms para 150ms a pedido do Davi -- o toque curto
+ * continua andando pouco, mas a velocidade cheia chega na metade do tempo. Se ainda
+ * parecer arrastado, o proximo passo e' 100ms; zerar volta ao comportamento antigo
+ * (velocidade maxima ja' no primeiro tick, sem precisao nenhuma). */
 &mmv {
-    time-to-max-speed-ms = <300>;
+    time-to-max-speed-ms = <150>;
     acceleration-exponent = <1>;
 };
 
@@ -190,7 +195,7 @@
                 // Ativação Lower: 1 toque/hold no polegar Lower = L1.
                 // Ativação Navegação: 2 toques e SEGURA no polegar Lower = L3 (momentâneo, libera ao soltar).
                 // Tecla A = turbo 2.5x (segurar).
-                // Teclas I/K/J/L = movimento com inercia (&mmv, rampa de 300ms).
+                // Teclas I/K/J/L = movimento com inercia (&mmv, rampa de 150ms).
                 // Teclas U/O = scroll 0ms curto (direto &msc).
                 // Teclas GUI, Space, Ctrl, Alt e Enter disponíveis diretamente no modo mouse.
                                 bindings = <
