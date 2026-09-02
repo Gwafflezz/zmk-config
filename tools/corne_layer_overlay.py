@@ -479,7 +479,11 @@ class StudioReader(threading.Thread):
         64:'F7',65:'F8',66:'F9',67:'F10',68:'F11',69:'F12',
         70:'PrSc', 74:'Home',75:'PgUp',76:'⌦',77:'End',78:'PgDn',
         79:'→',80:'←',81:'↓',82:'↑',
-        94:'BT0',95:'BT1',96:'BT2',97:'BT3',98:'BT4',
+        # 94-98 sao os digitos do teclado NUMERICO (HID 0x5E-0x62), nao bluetooth.
+        # O rotulo antigo dizia BT0-BT4 e fez um dump do aparelho ser lido errado.
+        # Bluetooth nao vive na pagina de teclado: vem da behavior &bt (ver _beh_label).
+        89:'KP1',90:'KP2',91:'KP3',92:'KP4',93:'KP5',
+        94:'KP6',95:'KP7',96:'KP8',97:'KP9',98:'KP0',
         104:'F13',105:'F14',106:'F15',107:'F16',
         127:'Mute',128:'Vol+',129:'Vol-',
         224:'Ctrl',225:'⇧',226:'Alt',227:'Gui',
