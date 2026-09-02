@@ -770,7 +770,7 @@ def binding_label(tokens):
         return RGB_LABELS.get(args[0], args[0].replace("RGB_", ""))
     if beh == "&mkp" and args:
         return MOUSE_KEYS.get(args[0], args[0])
-    if beh == "&mmv" and args:
+    if beh in ("&mmv", "&mmv_turbo") and args:
         m = _MOVE_RE.fullmatch(args[0])
         if m:
             speed = int(m.group(2))

@@ -19,18 +19,30 @@
     chain-length = <27>;
 };
 
-/* Resposta instantanea sem ramp-up / sem dampening para movimento e scroll */
+/* Cursor com inercia: o toque curto anda pouco (precisao pra acertar alvo pequeno)
+ * e a velocidade cresce ate' o maximo se a tecla ficar segurada.
+ *
+ * A rampa so' existe com os DOIS valores diferentes de zero: em
+ * behavior_input_two_axis.c:115 a velocidade e' clampada no maximo quando
+ * time-to-max-speed-ms == 0 OU acceleration-exponent == 0. A config antiga
+ * zerava os dois, dai' o cursor sair em velocidade cheia no primeiro tick.
+ *
+ * Ajuste fino: subir time-to-max-speed-ms alonga a rampa; expoente 2 (quadratico)
+ * deixa o inicio ainda mais lento, pra alvo bem pequeno. 300/1 e' o default do ZMK. */
 &mmv {
-    time-to-max-speed-ms = <0>;
-    acceleration-exponent = <0>;
+    time-to-max-speed-ms = <300>;
+    acceleration-exponent = <1>;
 };
 
+/* Scroll segue instantaneo de proposito: rolagem nao precisa de mira. */
 &msc {
     time-to-max-speed-ms = <0>;
     acceleration-exponent = <0>;
 };
 
-/* Turbo (camada 4): multiplica a velocidade do cursor por 2.5x (5/2) */
+/* Turbo acionado NO MEIO de um movimento ja' em curso: o binding em voo continua
+ * sendo o &mmv (o ZMK resolve o binding no press e a camada nao troca o que ja'
+ * esta' rodando), entao o boost precisa continuar vindo do input processor. */
 &mmv_input_listener {
     turbo {
         layers = <4>;
@@ -39,7 +51,29 @@
 };
 
 / {
+        /* Instancia separada do movimento, SEM rampa, usada so' pelas teclas da
+         * camada 4 (turbo). A rampa e' propriedade da instancia do comportamento,
+         * nao da camada, entao turbo e cursor normal precisam de nos diferentes --
+         * um input processor multiplica a saida, mas nao desfaz a aceleracao.
+         * Listener proprio porque cada zmk,input-listener escuta um unico device;
+         * o scaler 5/2 aqui nao precisa de filtro de camada, ja' que este device
+         * so' emite quando uma tecla da camada 4 e' pressionada. */
+        mmv_turbo_listener: mmv_turbo_listener {
+                compatible = "zmk,input-listener";
+                device = <&mmv_turbo>;
+                input-processors = <&zip_xy_scaler 5 2>;
+        };
+
         behaviors {
+                mmv_turbo: mmv_turbo {
+                        compatible = "zmk,behavior-input-two-axis";
+                        #binding-cells = <1>;
+                        x-input-code = <INPUT_REL_X>;
+                        y-input-code = <INPUT_REL_Y>;
+                        time-to-max-speed-ms = <0>;
+                        acceleration-exponent = <0>;
+                };
+
                 // Tap-dance no polegar Raise (40):
                 // 1 toque/hold = Raise (L2)
                 // 2 toques e SEGURA = Navegação (L3) momentâneo (libera ao soltar o switch)
@@ -156,7 +190,7 @@
                 // Ativação Lower: 1 toque/hold no polegar Lower = L1.
                 // Ativação Navegação: 2 toques e SEGURA no polegar Lower = L3 (momentâneo, libera ao soltar).
                 // Tecla A = turbo 2.5x (segurar).
-                // Teclas I/K/J/L = movimento 0ms (direto &mmv).
+                // Teclas I/K/J/L = movimento com inercia (&mmv, rampa de 300ms).
                 // Teclas U/O = scroll 0ms curto (direto &msc).
                 // Teclas GUI, Space, Ctrl, Alt e Enter disponíveis diretamente no modo mouse.
                                 bindings = <
@@ -176,9 +210,12 @@
                 // Sem teclas &ext_power: CONFIG_ZMK_EXT_POWER=n (teste de 2026-09-02, as
                 // duas polaridades de P0.13 derrubam o VCC neste clone -- ver corne.conf).
                 //                    | GUI | NONE| ENT |   | SPC | NONE| ALT  |
+                // Movimento aqui usa &mmv_turbo (sem rampa): entrar no turbo e SO'
+                // ENTAO mover da' velocidade cheia no primeiro tick, sem a inercia
+                // que a camada 3 tem. O scroll continua no &msc, ja' instantaneo.
                                 bindings = <
-                &studio_unlock &none     &none    &none    &none    &none    &msc SCRL_LEFT  &msc SCRL_DOWN  &mmv MOVE_Y(-600) &msc SCRL_UP    &msc SCRL_RIGHT &none
-                &kp LSHFT      &turbo_mo &mkp MCLK &mkp RCLK &mkp LCLK &none    &none           &mmv MOVE_X(-600) &mmv MOVE_Y(600)  &mmv MOVE_X(600) &none           &kp C_PREV
+                &studio_unlock &none     &none    &none    &none    &none    &msc SCRL_LEFT  &msc SCRL_DOWN  &mmv_turbo MOVE_Y(-600) &msc SCRL_UP &msc SCRL_RIGHT &none
+                &kp LSHFT      &turbo_mo &mkp MCLK &mkp RCLK &mkp LCLK &none    &none           &mmv_turbo MOVE_X(-600) &mmv_turbo MOVE_Y(600) &mmv_turbo MOVE_X(600) &none &kp C_PREV
                 &kp LCTRL      &none     &none    &none    &none    &none    &none           &none           &none             &rgb_ug RGB_TOG &none           &rgb_ug RGB_BRI
                                              &kp LGUI &none    &kp RET  &kp SPACE       &none           &kp RALT
                                 >;
