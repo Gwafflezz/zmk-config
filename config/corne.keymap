@@ -91,30 +91,35 @@
         keymap {
                 compatible = "zmk,keymap";
 
+                /* As legendas dos diagramas assumem xkb layout "br" (ABNT2) no host:
+                 * SEMI=ç  SQT=~^(dead)  LBKT=´`(dead)  RBKT=[{  BSLH=]}
+                 * NON_US_BACKSLASH=\|  INT1=/?  FSLH=;:  LS(N6)=¨(dead)
+                 * F13-F16 sao reservados pra sinalizacao do overlay (lower_mo/raise_mo). */
+
                 default_layer {
 // -----------------------------------------------------------------------------------------
 // |  TAB |  Q  |  W  |  E  |  R  |  T  |   |  Y  |  U   |  I  |  O  |  P  | BSPC |
-// | CTRL |  A  |  S  |  D  |  F  |  G  |   |  H  |  J   |  K  |  L  |  Ç  |  '   |
-// | SHFT |  Z  |  X  |  C  |  V  |  B  |   |  N  |  M   |  ,  |  .  |  /  | ESC  |
+// | CTRL |  A  |  S  |  D  |  F  |  G  |   |  H  |  J   |  K  |  L  |  Ç  | ~ ^  |
+// | SHFT |  Z  |  X  |  C  |  V  |  B  |   |  N  |  M   |  ,  |  .  | ´ ` | ESC  |
 //                    | GUI | LWR | ENT |   | SPC | RSE  | ALT |
                         bindings = <
    &kp TAB   &kp Q &kp W &kp E &kp R &kp T   &kp Y &kp U  &kp I     &kp O   &kp P    &kp BSPC
-   &kp LCTRL &kp A &kp S &kp D &kp F &kp G   &kp H &kp J  &kp K     &kp L   &kp RA(C) &kp SQT
-   &kp LSHFT &kp Z &kp X &kp C &kp V &kp B   &kp N &kp M  &kp COMMA &kp DOT &kp FSLH &kp ESC
+   &kp LCTRL &kp A &kp S &kp D &kp F &kp G   &kp H &kp J  &kp K     &kp L   &kp SEMI &kp SQT
+   &kp LSHFT &kp Z &kp X &kp C &kp V &kp B   &kp N &kp M  &kp COMMA &kp DOT &kp LBKT &kp ESC
                   &kp LGUI &lower_mo &kp RET     &kp SPACE &td_rse_nav &kp RALT
                         >;
                 };
 
                 lower_layer {
 // -----------------------------------------------------------------------------------------
-// |  TAB |  1  |  2  |  3  |  4  |  5  |   | VDN | VUP |  UP | SUN+| SUN-| DEL  |
-// | SHFT |  6  |  7  |  8  |  9  |  0  |   | PLAY| LFT | DWN | RGT | PRSC|      |
-// | CTRL |     |     |     |     |     |   | HOME| PGUP| PGDN| END |     |      |
+// |  TAB |  F1 |  F2 |  F3 |  F4 |  F5 |   | VDN | VUP |  UP | SUN+| SUN-| DEL  |
+// | SHFT |  F6 |  F7 |  F8 |  F9 | F10 |   | PLAY| LFT | DWN | RGT | PRSC|      |
+// | CTRL | F11 | F12 |     |     |     |   | HOME| PGUP| PGDN| END |     |      |
 //                    | GUI |     | ENT |   | SPC |     | ALT |
                         bindings = <
-   &kp TAB    &kp N1  &kp N2  &kp N3  &kp N4  &kp N5    &kp C_VOL_DN  &kp C_VOL_UP  &kp UP    &kp C_BRI_UP  &kp C_BRI_DN  &kp DEL
-   &kp LSHFT  &kp N6  &kp N7  &kp N8  &kp N9  &kp N0    &kp C_PP      &kp LEFT      &kp DOWN  &kp RIGHT     &kp PRINTSCREEN &trans
-   &kp LCTRL  &trans  &trans  &trans  &trans  &trans    &kp HOME      &kp PG_UP     &kp PG_DN &kp END       &trans        &trans
+   &kp TAB    &kp F1  &kp F2  &kp F3  &kp F4  &kp F5    &kp C_VOL_DN  &kp C_VOL_UP  &kp UP    &kp C_BRI_UP  &kp C_BRI_DN  &kp DEL
+   &kp LSHFT  &kp F6  &kp F7  &kp F8  &kp F9  &kp F10   &kp C_PP      &kp LEFT      &kp DOWN  &kp RIGHT     &kp PRINTSCREEN &trans
+   &kp LCTRL  &kp F11 &kp F12 &trans  &trans  &trans    &kp HOME      &kp PG_UP     &kp PG_DN &kp END       &trans        &trans
                               &kp LGUI &trans &kp RET   &kp SPACE     &trans        &kp RALT
                         >;
                 };
@@ -122,13 +127,14 @@
                 raise_layer {
 // -----------------------------------------------------------------------------------------
 // |  TAB |  1  |  2  |  3  |  4  |  5  |   |  6  |  7  |  8  |  9  |  0  | BSPC |
-// | SHFT |     |     |     |     |     |   |  -  |  =  |  {  |  }  |  \  |  `   |
-// | CTRL |     |     |     |     |     |   |  -  |  =  |  {  |  }  |  \  |  `   |
+// | SHFT |  _  |  +  |  ?  |  :  |  ¨  |   |  -  |  =  |  [  |  ]  |  \  |  '   |
+// | CTRL |     |     |     |     |     |   |  /  |  ;  |  {  |  }  |  |  |  "   |
 //                    | GUI |     | ENT |   | SPC |     | ALT |
+// ! @ # $ % & * ( ) saem no shift dos numeros, como num teclado normal.
                         bindings = <
-   &kp TAB    &kp N1  &kp N2  &kp N3  &kp N4  &kp N5    &kp N6     &kp N7     &kp N8    &kp N9    &kp N0    &kp BSPC
-   &kp LSHFT  &trans  &trans  &trans  &trans  &trans    &kp MINUS  &kp EQUAL  &kp LBRC  &kp RBRC  &kp BSLH  &kp GRAVE
-   &kp LCTRL  &trans  &trans  &trans  &trans  &trans    &kp MINUS  &kp EQUAL  &kp LBRC  &kp RBRC  &kp BSLH  &kp GRAVE
+   &kp TAB    &kp N1        &kp N2        &kp N3       &kp N4       &kp N5      &kp N6     &kp N7     &kp N8        &kp N9        &kp N0                   &kp BSPC
+   &kp LSHFT  &kp LS(MINUS) &kp LS(EQUAL) &kp LS(INT1) &kp LS(FSLH) &kp LS(N6)  &kp MINUS  &kp EQUAL  &kp RBKT      &kp BSLH      &kp NON_US_BACKSLASH     &kp GRAVE
+   &kp LCTRL  &trans        &trans        &trans       &trans       &trans      &kp INT1   &kp FSLH   &kp LS(RBKT)  &kp LS(BSLH)  &kp LS(NON_US_BACKSLASH) &kp LS(GRAVE)
                               &kp LGUI &trans &kp RET   &kp SPACE  &trans     &kp RALT
                         >;
                 };
